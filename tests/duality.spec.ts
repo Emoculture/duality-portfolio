@@ -164,11 +164,8 @@ test("classic imageboard boards, cross-thread quotes, thumbnails and hidden reco
     page.getByRole("heading", { name: /Popular Threads/ }),
   ).toBeVisible();
   await expect(page.getByRole("heading", { name: /Stats/ })).toBeVisible();
-  await expect(page.locator(".ib-shell")).toHaveCSS("max-width", "740px");
-  await expect(page.locator(".ib-box").first()).toHaveCSS(
-    "background-color",
-    "rgb(255, 255, 238)",
-  );
+  await expect(page.locator(".retro-layout")).toBeVisible();
+  await expect(page.locator(".ie-titlebar")).toBeVisible();
   for (const name of [
     "/dev/ — Проекты",
     "/me/ — Об авторе",
@@ -304,4 +301,106 @@ test("project filters and repository links in both modes", async ({ page }) => {
   await expect(
     page.getByRole("link", { name: "Репозиторий GitHub" }),
   ).toHaveAttribute("href", "https://github.com/Emoculture/luna-nails");
+});
+
+test("retro browser history, files and window controls", async ({ page }) => {
+  await page.addInitScript(() =>
+    localStorage.setItem(
+      "duality.v1",
+      JSON.stringify({
+        mode: "archive",
+        unlocked: true,
+        discovered: true,
+        reduced: true,
+      }),
+    ),
+  );
+  await page.goto("/");
+  await expect(
+    page.getByText("/archive/ — Личный архив — Microsoft Internet Explorer"),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Назад", exact: true }),
+  ).toBeDisabled();
+  await page.getByRole("button", { name: "/projects/", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: /Каталог работ/ }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "/about/", exact: true }).click();
+  await page.getByRole("button", { name: "Назад", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: /Каталог работ/ }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Вперёд", exact: true }).click();
+  await expect(page.getByRole("heading", { name: /Об авторе/ })).toBeVisible();
+  await page.getByRole("button", { name: "Домой", exact: true }).click();
+  await page.getByRole("button", { name: /log_2004.txt/ }).click();
+  await expect(
+    page.getByRole("heading", { name: /Журнал восстановления/ }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: /readme.txt/ }).click();
+  await expect(page.getByRole("heading", { name: "README.NFO" })).toBeVisible();
+  await page.getByRole("button", { name: /image_017.jpg/ }).click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: /\?\?\?.bin/ }).click();
+  await expect(
+    page.getByRole("heading", { name: "THE USER WHO NEVER LEFT" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Свернуть окно" }).click();
+  await expect(page.locator(".retro-layout")).toBeHidden();
+  await page.getByRole("button", { name: "Восстановить окно" }).click();
+  await expect(page.locator(".retro-layout")).toBeVisible();
+  await page.getByRole("button", { name: "Уменьшить окно" }).click();
+  await expect(page.locator(".ib-shell")).toHaveClass(/ie-windowed/);
+  await page.getByRole("button", { name: "Развернуть окно" }).click();
+  await expect(page.locator(".ib-shell")).not.toHaveClass(/ie-windowed/);
+  await noOverflow(page);
+});
+
+test("home quotes, project search and portrait", async ({ page }) => {
+  await page.addInitScript(() =>
+    localStorage.setItem(
+      "duality.v1",
+      JSON.stringify({
+        mode: "archive",
+        unlocked: true,
+        discovered: true,
+        reduced: true,
+      }),
+    ),
+  );
+  await page.goto("/");
+  await expect(page.locator(".retro-avatar-button img")).toHaveAttribute(
+    "src",
+    "/archive/user-000.png",
+  );
+  await page
+    .locator(".retro-replies")
+    .getByRole("button", { name: ">>1273", exact: true })
+    .click();
+  await expect(page.locator("#post-1273")).toBeFocused();
+  await page.getByRole("button", { name: "Домой", exact: true }).click();
+  await page
+    .locator(".retro-replies")
+    .getByRole("button", { name: ">>1274", exact: true })
+    .click();
+  await expect(page.locator("#post-1274")).toBeFocused();
+  await expect(page.locator(".retro-thread-avatar")).toHaveAttribute(
+    "src",
+    "/archive/user-000.png",
+  );
+  await page.getByRole("button", { name: "Поиск", exact: true }).click();
+  await page.getByLabel("Поиск по проектам").fill("LUNA");
+  await page.getByRole("button", { name: "Найти", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "LUNA NAILS" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "CUT CULTURE" })).toHaveCount(
+    0,
+  );
+  await page.getByRole("button", { name: "Профиль пользователя №000", exact: true }).click();
+  await expect(page.locator(".retro-profile-avatar")).toHaveAttribute(
+    "src",
+    "/archive/user-000.png",
+  );
+  await noOverflow(page);
 });

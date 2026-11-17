@@ -116,4 +116,5 @@ export const threads: ArchiveThread[] = [
     ],
   },
 ];
-export const imageSource = (name: string) => `/archive/${name}.svg`;
+export const imageSource = (name: string) =>
+  `/archive/${name}.${name === "corridor" ? "png" : "svg"}`;

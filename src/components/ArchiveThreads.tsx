@@ -65,6 +65,13 @@ export default function ArchiveThreads({
                     </button>
                   )}
                 </header>
+                {p.zero && (
+                  <img
+                    className="retro-thread-avatar"
+                    src="/archive/user-000.png"
+                    alt="Портрет пользователя №000"
+                  />
+                )}
                 {p.image && (
                   <figure>
                     <button
