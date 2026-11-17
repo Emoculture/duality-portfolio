@@ -145,3 +145,44 @@ test("secret ending requires the case evidence and survives a new run", async ({
   await expect(page.locator(".incident-journal")).toContainText("MEMORY_PROTOCOL");
   await expect(page.locator(".archive-board")).toHaveAttribute("data-incident-stage", "1");
 });
+
+test("rejected storage writes keep the current session playable", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("duality.v1", JSON.stringify({ mode: "archive", unlocked: true, discovered: true }));
+    localStorage.setItem("duality.incident.v1", JSON.stringify({ version: 1, clues: ["thread", "moderator", "image"] }));
+    const original = Storage.prototype.setItem;
+    Storage.prototype.setItem = function (key, value) {
+      if (key === "duality.incident.v1") throw new DOMException("Quota exceeded", "QuotaExceededError");
+      return original.call(this, key, value);
+    };
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
+  const nav = page.getByRole("navigation", { name: "Разделы INCIDENT 000" });
+  await nav.getByRole("button", { name: "/recovery/" }).click();
+  await page.getByLabel("Контрольное слово").fill("TRACE");
+  await page.getByRole("button", { name: "Восстановить переписку" }).click();
+  await nav.getByRole("button", { name: "/journal/" }).click();
+  await expect(page.getByRole("region", { name: "Дело о пропавшем человеке" })).toContainText("восстановлена; слово TRACE");
+});
+
+test("new investigation fits narrow viewports without console errors", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.addInitScript(() => {
+    localStorage.setItem("duality.v1", JSON.stringify({ mode: "archive", unlocked: true, discovered: true, reduced: true }));
+    localStorage.setItem("duality.incident.v1", JSON.stringify({ version: 1, clues: ["thread", "moderator", "image"] }));
+  });
+  await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
+  await page.goto("/");
+  await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
+  const nav = page.getByRole("navigation", { name: "Разделы INCIDENT 000" });
+  for (const width of [320, 375, 390, 430]) {
+    await page.setViewportSize({ width, height: 740 });
+    for (const label of ["/journal/", "/threads/", "/recovery/", "/cctv/", "/user_000/"]) {
+      await nav.getByRole("button", { name: label, exact: true }).click();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+    }
+  }
+  expect(errors).toEqual([]);
+});

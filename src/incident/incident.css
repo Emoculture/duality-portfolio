@@ -58,6 +58,7 @@
 .memory-camera figcaption { padding: 4px; font: 12px "Courier New", monospace; }
 .memory-camera-1::after { content: ""; position: absolute; top: 48%; left: 57%; width: 16px; height: 60px; background: #151915; box-shadow: 0 0 5px #202820; border-radius: 45% 45% 0 0; }
 .memory-camera-2 img { opacity: .4; filter: grayscale(1) contrast(1.4); }
+.memory-camera-2.memory-camera-restored img { opacity: 1; filter: grayscale(1); }
 /* Static, chapter-dependent traces leave the light shell and controls legible. */
 .archive-board[data-incident-stage="2"] .incident-journal::after,
 .archive-board[data-incident-stage="3"] .incident-journal::after,

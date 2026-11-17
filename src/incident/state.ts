@@ -27,6 +27,7 @@ export type IncidentSave = {
 };
 const KEY = "duality.incident.v1";
 let volatileSave: IncidentSave | null = null;
+let volatileDirty = false;
 const copy = (s: IncidentSave): IncidentSave => ({
   ...s,
   visited: [...s.visited],
@@ -57,6 +58,9 @@ const strings = (v: unknown): string[] =>
     ? v.filter((x): x is string => typeof x === "string").slice(0, 200)
     : [];
 export function loadIncident(): IncidentSave {
+  // If a write was rejected (for example, storage quota), the last successful
+  // disk value is stale. Keep the current session playable from memory.
+  if (volatileDirty && volatileSave) return copy(volatileSave);
   try {
     const raw = localStorage.getItem(KEY);
     if (raw) {
@@ -121,8 +125,9 @@ export function saveIncident(s: IncidentSave) {
   }
   try {
     localStorage.setItem(KEY, JSON.stringify(s));
+    volatileDirty = false;
   } catch {
-    /* session remains playable */
+    volatileDirty = true;
   }
   return copy(s);
 }

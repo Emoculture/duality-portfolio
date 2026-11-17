@@ -76,7 +76,7 @@ export default function MemoryCase({ view, save, update }: Props) {
         <label>Таймкод <select value={frame} onChange={(event) => setFrame(event.target.value)}>
           <option>00:00</option><option>00:01</option><option>00:02</option>
         </select></label>
-        <figure className={`memory-camera memory-camera-${frame.slice(-1)}`}>
+        <figure className={`memory-camera memory-camera-${frame.slice(-1)} ${frame === "00:02" && memory.events.includes("midnight") ? "memory-camera-restored" : ""}`}>
           <img src="/archive/camera-unknown.svg" alt="Вымышленная комната в архиве камеры" />
           <figcaption>CAMERA_000 / {frame} {frame === "00:02" ? (memory.events.includes("midnight") ? "— СИГНАЛ ВОССТАНОВЛЕН: ДВЕРЬ ОТКРЫТА" : "— ПОТЕРЯ СИГНАЛА") : frame === "00:01" ? "— ТЕНЬ У ДВЕРИ" : "— АРХИВНЫЙ КАДР"}</figcaption>
         </figure>
