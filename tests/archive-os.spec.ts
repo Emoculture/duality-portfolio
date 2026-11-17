@@ -39,6 +39,10 @@ test("desktop windows open, focus, drag, close and reopen", async ({ page }, inf
   expect(windowBox.x).toBeLessThan(900);
   expect(windowBox.y).toBeLessThan(600);
   await expect(page.getByRole("button", { name: "▦ ARCHIVE_OS" })).toBeVisible();
+  await page.getByRole("button", { name: "Закрыть окно ARCHIVE.EXE" }).click();
+  await expect(page.getByRole("region", { name: "Окно архива" })).toBeHidden();
+  await page.getByRole("button", { name: "Выход из ARCHIVE_OS" }).click();
+  await expect(page.locator(".portfolio")).toBeVisible();
 });
 
 test("fullscreen can be entered and exited without changing progress", async ({ page }) => {
@@ -81,5 +85,5 @@ test("late-stage YOU file is accessible on desktop and phone and remembered", as
     await page.locator(".archive-os-mobile-you summary").click();
     await expect(page.locator(".archive-os-mobile-you")).toContainText("Содержимое вымышлено");
   }
-  expect(await page.evaluate(() => JSON.parse(localStorage.getItem("duality.incident.v1")!).memory.events)).toContain("decay-found:you");
+  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem("duality.incident.v1")!).memory.events)).toContain("decay-found:you");
 });

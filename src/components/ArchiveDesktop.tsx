@@ -8,7 +8,7 @@ type WindowName = "browser" | "navigator" | "memory" | "you";
 const titles: Record<WindowName, string> = { browser: "ARCHIVE.EXE", navigator: "Проводник", memory: "MEMORY.LOG", you: "YOU" };
 const links: [string, ArchivePage][] = [["Главная", "home"], ["Проекты", "projects"], ["Треды", "threads"], ["Об авторе", "about"], ["Файлы", "files"], ["Расследование", "incident"]];
 
-export default function ArchiveDesktop({ children, stage, navigate }: { children: ReactNode; stage: DecayStage; navigate: (page: ArchivePage) => void }) {
+export default function ArchiveDesktop({ children, stage, navigate, onExit }: { children: ReactNode; stage: DecayStage; navigate: (page: ArchivePage) => void; onExit: () => void }) {
   const desktop = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState<WindowName[]>(["browser"]);
   const [order, setOrder] = useState<WindowName[]>(["browser"]);
@@ -96,7 +96,7 @@ export default function ArchiveDesktop({ children, stage, navigate }: { children
       {title("browser")}{children}
     </section>
     {open.includes("navigator") && <section className="archive-os-window" aria-label="Окно проводника" onPointerDown={() => focus("navigator")} style={{ left: positions.navigator.x, top: positions.navigator.y, zIndex: 10 + order.indexOf("navigator") }}>
-      {title("navigator")}<div className="archive-os-body"><p>ARCHIVE:\\</p>{links.map(([label, page]) => <button key={page} onClick={() => openPage(page)}>▣ {label}</button>)}{stage >= 3 && <button onClick={openYou}>▧ YOU</button>}</div>
+      {title("navigator")}<div className="archive-os-body"><p>ARCHIVE:\\</p>{stage >= 1 && <p>DATE: 2004.??.07 / повреждённый индекс</p>}{links.map(([label, page]) => <button key={page} onClick={() => openPage(page)}>▣ {label}</button>)}{stage >= 3 && <button onClick={openYou}>▧ YOU</button>}</div>
     </section>}
     {open.includes("memory") && <section className="archive-os-window" aria-label="Окно журнала памяти" onPointerDown={() => focus("memory")} style={{ left: positions.memory.x, top: positions.memory.y, zIndex: 10 + order.indexOf("memory") }}>
       {title("memory")}<div className="archive-os-body"><p>MEMORY.LOG / локальная копия</p><p>Файлы: {progress.files.length} · улики: {progress.clues.length}</p><p>Для исследования откройте соответствующий раздел архива.</p><button onClick={() => openPage("incident")}>Открыть расследование</button></div>
@@ -105,6 +105,6 @@ export default function ArchiveDesktop({ children, stage, navigate }: { children
       {title("you")}<div className="archive-os-body"><p>YOU / неопознанная архивная запись</p><p>Источник неизвестен. Это вымышленный файл; сведения о посетителе не используются.</p><p>«Копия ответила раньше, чем её открыли».</p></div>
     </section>}
     {stage >= 3 && <details className="archive-os-mobile-you" onToggle={(event) => { if (event.currentTarget.open) rememberYou(); }}><summary>▧ YOU / неопознанная запись</summary><p>«Копия ответила раньше, чем её открыли». Содержимое вымышлено и не использует сведения о посетителе.</p></details>}
-    <footer className="archive-os-taskbar"><button onClick={() => setStart(!start)} aria-expanded={start}>▦ ARCHIVE_OS</button>{open.map((name) => <button key={name} onClick={() => focus(name)} aria-pressed={order.at(-1) === name}>{titles[name]}</button>)}<span className="archive-os-clock" aria-label="Индикатор звука">{sound ? "♪ ON" : "♪ OFF"}</span><span className="archive-os-clock">SYS · {stage === 4 ? `00:${String(59 - clock).padStart(2, "0")}` : `00:${String(clock).padStart(2, "0")}`}</span>{start && <div className="archive-os-start"><button onClick={() => focus("browser")}>ARCHIVE.EXE</button><button onClick={() => focus("navigator")}>Проводник</button><button onClick={() => focus("memory")}>MEMORY.LOG</button></div>}</footer>
+    <footer className="archive-os-taskbar"><button onClick={() => setStart(!start)} aria-expanded={start}>▦ ARCHIVE_OS</button>{open.map((name) => <button key={name} onClick={() => focus(name)} aria-pressed={order.at(-1) === name}>{titles[name]}</button>)}<button onClick={onExit} aria-label="Выход из ARCHIVE_OS">ВЫХОД</button><span className="archive-os-clock" aria-label="Индикатор звука">{sound ? "♪ ON" : "♪ OFF"}</span><span className="archive-os-clock">SYS · {stage === 4 ? `00:${String(59 - clock).padStart(2, "0")}` : `00:${String(clock).padStart(2, "0")}`}</span>{start && <div className="archive-os-start"><button onClick={() => focus("browser")}>ARCHIVE.EXE</button><button onClick={() => focus("navigator")}>Проводник</button><button onClick={() => focus("memory")}>MEMORY.LOG</button></div>}</footer>
   </div>;
 }

@@ -12,7 +12,7 @@ export default function ArchiveAnomalyManager({ stage, reduced, onExitWarning }:
   useEffect(() => {
     const before = previous.current;
     previous.current = stage;
-    if (stage === 0 || stage <= before) return;
+    if (stage === 0 || stage <= before) { setShown(null); onExitWarning(false); return; }
     const save = loadIncident();
     const key = `decay-shown:${stage}`;
     if (save.memory.events.includes(key)) return;

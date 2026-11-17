@@ -63,6 +63,18 @@ test("milestone anomaly is skippable, saved once and keeps exit available", asyn
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem("duality.incident.v1")!).memory.events.filter((s: string) => s === "decay-shown:1").length)).toBe(1);
 });
 
+test("restarting a run clears active decay while retaining ending history", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("duality.v1", JSON.stringify({ unlocked: true, reduced: true }));
+    localStorage.setItem("duality.incident.v1", JSON.stringify({ version: 1, clues: [], endings: ["RELEASE"], lastEnding: null, memory: { events: ["recording:first"] } }));
+  });
+  await page.goto("/");
+  await enterSavedArchive(page);
+  await expect(page.locator(".archive-board")).toHaveAttribute("data-decay-stage", "0");
+  await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
+  await expect(page.locator(".incident-journal")).toContainText("RELEASE");
+});
+
 test("late story camera reveals a fictional empty chair without removing existing clues", async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.setItem("duality.v1", JSON.stringify({ unlocked: true, reduced: true }));

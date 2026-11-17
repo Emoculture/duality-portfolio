@@ -165,7 +165,7 @@ export default function Archive({
       data-incident-stage={portraitStage}
       data-decay-stage={decayStage}
     >
-      <ArchiveDesktop stage={decayStage} navigate={navigate}>
+      <ArchiveDesktop stage={decayStage} navigate={navigate} onExit={onExit}>
       <a className="skip-link" href="#archive-main">
         К содержимому
       </a>
