@@ -96,3 +96,24 @@ test("skipping recovery still plays first contact and revealed text stays visibl
   await scene.getByRole("button", { name: "Пропустить запись" }).click();
   await expect(page.locator(".archive-board")).toBeVisible();
 });
+
+test("welcome and first recording fit four phone widths", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.addInitScript(() => localStorage.setItem("duality.v1", JSON.stringify({ unlocked: true })));
+  await page.goto("/");
+  for (const width of [320, 375, 390, 430]) {
+    await page.setViewportSize({ width, height: 740 });
+    await expect(page.getByRole("button", { name: "Неизвестный объект" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Войти на сайт" })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  }
+  await page.getByRole("button", { name: "Неизвестный объект" }).click();
+  await expect(page.locator(".pixel-cutscene")).toBeVisible();
+  for (const width of [320, 375, 390, 430]) {
+    await page.setViewportSize({ width, height: 740 });
+    await expect(page.getByRole("button", { name: "Пропустить запись" })).toBeVisible();
+    const box = await page.locator(".witness-sprite").boundingBox();
+    expect(box!.width / box!.height).toBeCloseTo(1312 / 1199, 1);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  }
+});
