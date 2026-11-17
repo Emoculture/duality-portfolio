@@ -1,0 +1,70 @@
+.investigation {
+  color: #800000;
+  font:
+    12px/1.6 Arial,
+    sans-serif;
+}
+.investigation h2 {
+  font:
+    bold 20px Georgia,
+    serif;
+  text-align: center;
+}
+.investigation h3 {
+  font-size: 13px;
+}
+.investigation h4 {
+  font-size: 12px;
+  margin: 8px 0;
+}
+.investigation-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(150px, 1fr);
+  gap: 10px;
+}
+.investigation-file,
+.investigation-journal {
+  border: 1px solid #800000;
+  background: #f0e0d6;
+  padding: 10px;
+}
+.investigation-journal {
+  background: #ffffee;
+  font-family: monospace;
+}
+.investigation-copy {
+  white-space: pre-line;
+}
+.investigation button {
+  color: #800000;
+  background: #ffccaa;
+  border: 1px solid #800000;
+  border-radius: 0;
+  padding: 8px;
+  margin: 3px 0;
+  min-height: 38px;
+}
+.investigation-hidden {
+  background: #f0e0d6 !important;
+  border: 1px dashed #c5a69a !important;
+}
+.investigation-clue {
+  color: #117743;
+}
+.investigation label {
+  display: block;
+}
+.investigation input {
+  max-width: 260px;
+}
+.investigation form p {
+  color: #ad0000;
+}
+@media (max-width: 520px) {
+  .investigation-layout {
+    grid-template-columns: 1fr;
+  }
+  .investigation {
+    font-size: 13px;
+  }
+}

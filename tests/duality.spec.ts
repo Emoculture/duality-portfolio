@@ -220,3 +220,88 @@ test("classic imageboard boards, cross-thread quotes, thumbnails and hidden reco
   await noOverflow(page);
   expect(errors).toEqual([]);
 });
+
+test("investigation clues, hints, persistence, ending and replay at 320px", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 740 });
+  await page.addInitScript(() =>
+    localStorage.setItem(
+      "duality.v1",
+      JSON.stringify({
+        mode: "archive",
+        unlocked: true,
+        discovered: true,
+        puzzle: false,
+        reduced: true,
+      }),
+    ),
+  );
+  await page.goto("/");
+  await page.getByRole("button", { name: /INVESTIGATION.TXT/ }).click();
+  await page.getByRole("button", { name: "Подсказка" }).click();
+  await expect(
+    page.getByText("В рамке под текстом есть кнопка с номером сообщения."),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Открыть скрытое сообщение No.1273" })
+    .click();
+  await page.getByRole("button", { name: "Записать улику" }).click();
+  await page.getByLabel("Ответ").fill("wrong");
+  await page.getByRole("button", { name: "Проверить" }).click();
+  await expect(page.getByRole("status")).toContainText("Ответ не совпал");
+  for (const answer of ["RECOVER", "1", "STAY", "ECHO-17-01", "STAY-COPY"]) {
+    await page.getByLabel("Ответ").fill(answer);
+    await page.getByRole("button", { name: "Проверить" }).click();
+  }
+  await expect(page.getByText("Найдено улик: 6 / 6")).toBeVisible();
+  await expect(
+    page.getByText(/Восстановление не вызвало появление/),
+  ).toBeVisible();
+  await noOverflow(page);
+  await page.reload();
+  await page.getByRole("button", { name: /INVESTIGATION.TXT/ }).click();
+  await expect(page.getByText("Найдено улик: 6 / 6")).toBeVisible();
+  await page
+    .getByRole("button", { name: "Начать расследование заново" })
+    .click();
+  await expect(page.getByText("Найдено улик: 0 / 6")).toBeVisible();
+});
+
+test("project filters and repository links in both modes", async ({ page }) => {
+  await page.addInitScript(() =>
+    localStorage.setItem(
+      "duality.v1",
+      JSON.stringify({
+        mode: "normal",
+        unlocked: true,
+        discovered: true,
+        reduced: true,
+      }),
+    ),
+  );
+  await page.goto("/");
+  await page
+    .getByLabel("Фильтр проектов")
+    .selectOption({ label: "TELEGRAM MINI APP" });
+  await expect(
+    page.getByRole("heading", { name: "Director Studio" }),
+  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "LUNA NAILS" })).toHaveCount(
+    0,
+  );
+  await page.getByText("Подробнее", { exact: true }).click();
+  await expect(
+    page.getByRole("link", { name: "Репозиторий GitHub" }),
+  ).toHaveAttribute("href", "https://github.com/Emoculture/prompt-craft-");
+  await page.getByRole("button", { name: "Вернуться в архив" }).click();
+  await page.getByRole("button", { name: "/projects/", exact: true }).click();
+  await page
+    .getByLabel("Фильтр:")
+    .selectOption({ label: "ДЕМОНСТРАЦИОННЫЙ САЙТ" });
+  await expect(page.getByRole("heading", { name: "LUNA NAILS" })).toBeVisible();
+  await page.getByText("Техническая запись").click();
+  await expect(
+    page.getByRole("link", { name: "Репозиторий GitHub" }),
+  ).toHaveAttribute("href", "https://github.com/Emoculture/luna-nails");
+});

@@ -37,6 +37,25 @@ export const portfolio = {
       href: "#home",
       kind: "duality",
     },
+    {
+      id: "03",
+      title: "LUNA NAILS",
+      category: "ДЕМОНСТРАЦИОННЫЙ САЙТ",
+      description: "Демонстрационный сайт вымышленной студии маникюра.",
+      tags: ["React", "TypeScript", "Vite"],
+      href: "https://luna-nails-mocha.vercel.app/",
+      kind: "luna",
+    },
+    {
+      id: "04",
+      title: "Director Studio",
+      category: "TELEGRAM MINI APP",
+      description:
+        "Telegram Mini App для создания промптов, сценариев и работы с визуальными референсами.",
+      tags: ["Telegram Mini App"],
+      href: "https://emoculture.github.io/prompt-craft-/",
+      kind: "director",
+    },
   ],
   services: [
     {
@@ -52,4 +71,11 @@ export const portfolio = {
       text: "Небольшие эксперименты, анимации и нестандартные цифровые впечатления.",
     },
   ],
+};
+
+export const projectRepositories: Record<string, string> = {
+  cut: "cut-culture",
+  duality: "duality-portfolio",
+  luna: "luna-nails",
+  director: "prompt-craft-",
 };

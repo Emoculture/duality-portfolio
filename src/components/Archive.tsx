@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { portfolio } from "../data";
+import { portfolio, projectRepositories } from "../data";
 import { validEcho } from "../state";
 import { boards, threads, imageSource, type ArchivePage } from "../archiveData";
 import ArchiveThreads from "./ArchiveThreads";
+import Investigation from "./Investigation";
 import ArchiveImage from "./ArchiveImage";
 import "../archive.css";
 export default function Archive({
@@ -22,6 +23,7 @@ export default function Archive({
 }) {
   const [page, setPage] = useState<ArchivePage>("home");
   const [settings, setSettings] = useState(false);
+  const [projectFilter, setProjectFilter] = useState("all");
   const [answer, setAnswer] = useState("");
   const [feedback, setFeedback] = useState("");
   const [hidden, setHidden] = useState(false);
@@ -110,6 +112,11 @@ export default function Archive({
           <p>Recovered from an unknown server</p>
         </header>
         {nav()}
+        <div style={{ textAlign: "center", marginBottom: 12 }}>
+          <button className="ib-link" onClick={() => navigate("investigation")}>
+            [ INVESTIGATION.TXT — THE USER WHO NEVER LEFT ]
+          </button>
+        </div>
         {settings && (
           <section className="ib-box ib-settings">
             <h2>Настройки сеанса</h2>
@@ -243,35 +250,75 @@ export default function Archive({
           )}
           {page === "projects" && (
             <>
-              <h2>Каталог работ / 02 записи</h2>
+              <h2>Каталог работ / 04 записи</h2>
               <p>Названия и адреса сохранены без изменений.</p>
-              {portfolio.projects.map((p) => (
-                <article className="ib-project" key={p.id}>
-                  <span className="ib-record">
-                    RECORD_{p.id} / STATUS: ONLINE
-                  </span>
-                  <h3>{p.title}</h3>
-                  <p>{p.description}</p>
-                  <div>{p.tags.join(" / ")}</div>
-                  <a
-                    href={p.href === "#home" ? "#" : p.href}
-                    onClick={
-                      p.kind === "duality"
-                        ? (e) => {
-                            e.preventDefault();
-                            onExit();
-                          }
-                        : undefined
-                    }
-                    target={p.kind === "cut" ? "_blank" : undefined}
-                    rel="noreferrer"
-                  >
-                    {p.kind === "cut"
-                      ? "Открыть CUT CULTURE ↗"
-                      : "Открыть обычное портфолио ↗"}
-                  </a>
-                </article>
-              ))}
+              <label>
+                Фильтр:{" "}
+                <select
+                  value={projectFilter}
+                  onChange={(e) => setProjectFilter(e.target.value)}
+                >
+                  <option value="all">Все</option>
+                  {[
+                    ...new Set(
+                      portfolio.projects.map((project) => project.category),
+                    ),
+                  ].map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {portfolio.projects
+                .filter(
+                  (project) =>
+                    projectFilter === "all" ||
+                    project.category === projectFilter,
+                )
+                .map((p) => (
+                  <article className="ib-project" key={p.id}>
+                    <span className="ib-record">
+                      RECORD_{p.id} / STATUS: ONLINE
+                    </span>
+                    <h3>{p.title}</h3>
+                    <p>{p.description}</p>
+                    <div>{p.tags.join(" / ")}</div>
+                    <details>
+                      <summary>Техническая запись</summary>
+                      <p>
+                        Дата создания: не проверена. Сведения о проекте — из
+                        публичного README.
+                      </p>
+                      <a
+                        href={`https://github.com/Emoculture/${projectRepositories[p.kind]}`}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Репозиторий GitHub ↗
+                      </a>
+                    </details>
+                    <a
+                      href={p.href === "#home" ? "#" : p.href}
+                      onClick={
+                        p.kind === "duality"
+                          ? (e) => {
+                              e.preventDefault();
+                              onExit();
+                            }
+                          : undefined
+                      }
+                      target={p.kind !== "duality" ? "_blank" : undefined}
+                      rel="noreferrer"
+                    >
+                      {p.kind === "cut"
+                        ? "Открыть CUT CULTURE ↗"
+                        : p.kind === "duality"
+                          ? "Открыть обычное портфолио ↗"
+                          : `Открыть ${p.title} ↗`}
+                    </a>
+                  </article>
+                ))}
               <p className="ib-muted">
                 [ Имя автора не найдено. Работы — найдены. ]
               </p>
@@ -399,6 +446,7 @@ export default function Archive({
             </>
           )}
 
+          {page === "investigation" && <Investigation />}
           {page === "threads" && (
             <ArchiveThreads
               selected={thread}

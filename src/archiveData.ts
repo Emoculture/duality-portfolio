@@ -5,7 +5,8 @@ export type ArchivePage =
   | "about"
   | "files"
   | "logs"
-  | "zero";
+  | "zero"
+  | "investigation";
 export const boards: {
   code: string;
   title: string;

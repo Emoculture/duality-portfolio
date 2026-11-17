@@ -1,4 +1,5 @@
-import { portfolio as p } from "../data";
+import { useState } from "react";
+import { portfolio as p, projectRepositories } from "../data";
 import { Arrow, Mark } from "./Mark";
 export default function Portfolio({
   onWelcome,
@@ -13,6 +14,7 @@ export default function Portfolio({
   reduced: boolean;
   onReduced: () => void;
 }) {
+  const [filter, setFilter] = useState("all");
   return (
     <div className="portfolio">
       <header className="site-header">
@@ -112,55 +114,88 @@ export default function Portfolio({
                 Из идеи <span className="serif">в реальность.</span>
               </h2>
             </div>
-            <span className="micro">SELECTED WORK / 01—02</span>
+            <span className="micro">SELECTED WORK / 01—04</span>
           </div>
+          <label className="project-filter">
+            Фильтр проектов{" "}
+            <select value={filter} onChange={(e) => setFilter(e.target.value)}>
+              <option value="all">Все</option>
+              {[...new Set(p.projects.map((project) => project.category))].map(
+                (category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ),
+              )}
+            </select>
+          </label>
           <div className="project-grid">
-            {p.projects.map((project) => (
-              <article className="project" key={project.id}>
-                <a
-                  className={`project-visual ${project.kind}`}
-                  href={project.href}
-                  target={project.kind === "cut" ? "_blank" : undefined}
-                  rel={project.kind === "cut" ? "noreferrer" : undefined}
-                  aria-label={`Открыть ${project.title}`}
-                >
-                  <span className="project-number">PROJECT / {project.id}</span>
-                  {project.kind === "cut" ? (
-                    <div className="cut-art">
-                      <span>LESS TALK.</span>
-                      <strong>
-                        MORE
-                        <br />
-                        CULTURE.
-                      </strong>
-                      <i>THE CUT CULTURE PROJECT</i>
-                    </div>
-                  ) : (
-                    <div className="duality-art">
-                      <Mark />
-                      <span>
-                        two sides.
-                        <br />
-                        <em>one identity.</em>
-                      </span>
-                    </div>
-                  )}
-                  <span className="round-arrow">
-                    <Arrow />
-                  </span>
-                </a>
-                <div className="project-meta">
-                  <h3>{project.title}</h3>
-                  <span className="micro">{project.category}</span>
-                </div>
-                <p>{project.description}</p>
-                <div className="tags">
-                  {project.tags.map((t) => (
-                    <span key={t}>{t}</span>
-                  ))}
-                </div>
-              </article>
-            ))}
+            {p.projects
+              .filter(
+                (project) => filter === "all" || project.category === filter,
+              )
+              .map((project) => (
+                <article className="project" key={project.id}>
+                  <a
+                    className={`project-visual ${project.kind}`}
+                    href={project.href}
+                    target={project.kind !== "duality" ? "_blank" : undefined}
+                    rel={project.kind !== "duality" ? "noreferrer" : undefined}
+                    aria-label={`Открыть ${project.title}`}
+                  >
+                    <span className="project-number">
+                      PROJECT / {project.id}
+                    </span>
+                    {project.kind === "cut" ? (
+                      <div className="cut-art">
+                        <span>LESS TALK.</span>
+                        <strong>
+                          MORE
+                          <br />
+                          CULTURE.
+                        </strong>
+                        <i>THE CUT CULTURE PROJECT</i>
+                      </div>
+                    ) : project.kind === "duality" ? (
+                      <div className="duality-art">
+                        <Mark />
+                        <span>
+                          two sides.
+                          <br />
+                          <em>one identity.</em>
+                        </span>
+                      </div>
+                    ) : null}
+                    {project.kind !== "cut" && project.kind !== "duality" && (
+                      <span className="new-project-title">{project.title}</span>
+                    )}
+                    <span className="round-arrow">
+                      <Arrow />
+                    </span>
+                  </a>
+                  <div className="project-meta">
+                    <h3>{project.title}</h3>
+                    <span className="micro">{project.category}</span>
+                  </div>
+                  <p>{project.description}</p>
+                  <details>
+                    <summary>Подробнее</summary>
+                    <p>{project.description}</p>
+                    <a
+                      href={`https://github.com/Emoculture/${projectRepositories[project.kind]}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Репозиторий GitHub ↗
+                    </a>
+                  </details>
+                  <div className="tags">
+                    {project.tags.map((t) => (
+                      <span key={t}>{t}</span>
+                    ))}
+                  </div>
+                </article>
+              ))}
           </div>
         </section>
         <section className="section" id="services">
