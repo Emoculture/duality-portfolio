@@ -1,5 +1,31 @@
 import { expect, test } from "@playwright/test";
 
+for (const choice of ["memory", "record"] as const) {
+  test(`NULL remembers the ${choice} interpretation and preserves it after reload`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.addInitScript(() => {
+      if (!localStorage.getItem("null-seeded")) {
+        localStorage.setItem("null-seeded", "yes");
+        localStorage.setItem("duality.v1", JSON.stringify({ mode: "archive", unlocked: true }));
+        localStorage.setItem("duality.incident.v1", JSON.stringify({ version: 1, clues: ["thread", "moderator", "image"], memory: { recovered: ["LETTER"], events: ["midnight"] } }));
+      }
+    });
+    await page.goto("/");
+    await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
+    const nav = page.getByRole("navigation", { name: "Разделы INCIDENT 000" });
+    await nav.getByRole("button", { name: "/user_000/" }).click();
+    const messenger = page.getByRole("region", { name: "Переписка с NULL" });
+    await messenger.getByRole("button", { name: "Сначала докажи" }).click();
+    await expect(messenger).toContainText("Справедливо");
+    await messenger.getByRole("button", { name: choice === "memory" ? "Сохранить воспоминание" : "Сверить с записью" }).click();
+    await page.reload();
+    await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
+    await expect(page.locator(".incident-journal")).toContainText(choice === "memory" ? "версия воспоминания" : "версия записи");
+    await nav.getByRole("button", { name: "/user_000/" }).click();
+    await expect(messenger).toContainText(choice === "memory" ? "часть памяти" : "тоже могла быть копией");
+  });
+}
+
 test("additional photo, log and transcript recover with clues and survive reload", async ({ page }) => {
   await page.addInitScript(() => {
     if (!localStorage.getItem("recovered-seeded")) {

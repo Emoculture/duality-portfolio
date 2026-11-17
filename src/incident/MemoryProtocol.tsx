@@ -7,9 +7,21 @@ export default function MemoryProtocol({ view, save, update }: Props) {
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [now, setNow] = useState(Date.now);
+  const [typing, setTyping] = useState(false);
   const memory = save.memory;
   const midnight = memory.events.includes("midnight");
   const reply = memory.nullChoices[0];
+  const interpretation = memory.nullChoices[1];
+  useEffect(() => {
+    if (!typing) return;
+    const timer = window.setTimeout(() => setTyping(false), 650);
+    return () => window.clearTimeout(timer);
+  }, [typing]);
+  function respond(choice: "help" | "doubt") {
+    const reduced = document.documentElement.dataset.reduced === "true" || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    setTyping(!reduced);
+    update((s) => ({ ...s, memory: { ...s.memory, nullChoices: [choice] } }));
+  }
   useEffect(() => {
     if (memory.timerDeadline === null || midnight) return;
     setNow(Date.now());
@@ -22,13 +34,18 @@ export default function MemoryProtocol({ view, save, update }: Props) {
       {!memory.recovered.includes("LETTER") ? <p>Соединение недоступно. Восстановите переписку LETTER_2007.TXT.</p> : <>
         <p>NULL: «Вы нашли след. Поможете разобраться, кто отвечал из копии?»</p>
         {!reply ? <div>
-          <button onClick={() => update((s) => ({ ...s, memory: { ...s.memory, nullChoices: ["help"] } }))}>Помогу</button>{" "}
-          <button onClick={() => update((s) => ({ ...s, memory: { ...s.memory, nullChoices: ["doubt"] } }))}>Сначала докажи</button>
+          <button onClick={() => respond("help")}>Помогу</button>{" "}
+          <button onClick={() => respond("doubt")}>Сначала докажи</button>
         </div> : <>
           <p>Вы: «{reply === "help" ? "Помогу" : "Сначала докажи"}»</p>
-          <p>NULL: «{reply === "help" ? "Спасибо. Я не уверен, кого мы восстанавливаем." : "Справедливо. Я тоже не знаю, можно ли мне верить."}»</p>
+          {typing ? <p role="status">NULL печатает…</p> : <p>NULL: «{reply === "help" ? "Спасибо. Я не уверен, кого мы восстанавливаем." : "Справедливо. Я тоже не знаю, можно ли мне верить."}»</p>}
           {midnight ? <>
             <p>NULL: «Время 00:00 — это метка процедуры, не время вашего устройства. Я думал, дверь была закрыта.»</p>
+            <p>NULL: «Если запись противоречит памяти, какую версию сохранить в деле?»</p>
+            {!interpretation ? <div>
+              <button onClick={() => update((s) => ({ ...s, memory: { ...s.memory, nullChoices: [s.memory.nullChoices[0], "memory"], changes: add(s.memory.changes, "NULL: в деле сохранена версия воспоминания.") } }))}>Сохранить воспоминание</button>{" "}
+              <button onClick={() => update((s) => ({ ...s, memory: { ...s.memory, nullChoices: [s.memory.nullChoices[0], "record"], changes: add(s.memory.changes, "NULL: в деле сохранена версия записи.") } }))}>Сверить с записью</button>
+            </div> : <p>Вы: «{interpretation === "memory" ? "Сохранить воспоминание" : "Сверить с записью"}». NULL: «{interpretation === "memory" ? "Тогда не стирай противоречие. Оно тоже часть памяти." : "Хорошо. Только запись тоже могла быть копией."}»</p>}
             {!memory.events.includes("null-complete") && <button onClick={() => update((s) => ({ ...s, memory: { ...s.memory, events: add(s.memory.events, "null-complete"), evidence: add(s.memory.evidence, "null") } }))}>Сохранить ответ NULL</button>}
             {memory.events.includes("null-complete") && <p>Переписка сохранена в деле.</p>}
           </> : <p>NULL: «В журнале есть таймер процедуры. Запусти его, если решишь продолжить.»</p>}

@@ -857,6 +857,8 @@ export default function Incident({
               ) : (
                 <>
                   <strong>MEMORY PROTOCOL</strong>
+                  {save.memory.nullChoices[1] === "memory" && <p>В журнале сохранена версия воспоминания NULL, вместе с её противоречием записи.</p>}
+                  {save.memory.nullChoices[1] === "record" && <p>В журнале сохранена версия записи; её происхождение остаётся под вопросом.</p>}
                   {save.memory.recovered.includes("CASE_LOG") && <p>Восстановленный SERVER_2007.LOG показывает: копия предшествовала попытке восстановления 2007 года.</p>}
                   {save.memory.recovered.includes("CASE_PHOTO") && <p>На фотографии комната не совпадает со схемой: место могло сохраниться только в записи.</p>}
                   {save.memory.recovered.includes("CASE_VOICE") && <p>Восстановленная расшифровка оставляет вопрос без ответа: кто просил записать след?</p>}
