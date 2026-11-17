@@ -18,6 +18,7 @@ test("wrong key stays in game; successful first connection finishes without loop
   await expect(sequence).toBeVisible();
   await page.clock.fastForward(6500);
   await expect(sequence).toContainText("NEW MEMORY SIGNATURE DETECTED");
+  await expect(sequence.locator(".connection-window")).toContainText("100%");
   await expect(sequence).not.toContainText("RESTORING SESSION...");
   await page.clock.fastForward(5000);
   await expect(page.locator(".pixel-cutscene")).toBeVisible();
