@@ -10,6 +10,7 @@ import ArchivePortrait from "./ArchivePortrait";
 import ArchiveImage from "./ArchiveImage";
 import ArchiveObserver from "./ArchiveObserver";
 import SoundSetting from "./SoundSetting";
+import { currentDecayStage } from "../incident/ArchiveDecayEngine";
 import "../archive.css";
 const incidentDirectories: Record<IncidentView, string> = {
   journal: "journal", forum: "threads", recovery: "recovery", cctv: "cctv",
@@ -32,6 +33,7 @@ export default function Archive({
 }) {
   const [page, setPage] = useState<ArchivePage>("home");
   const portraitStage = useSyncExternalStore(subscribeAvatarStage, avatarStage, () => 1);
+  const decayStage = useSyncExternalStore(subscribeAvatarStage, currentDecayStage, () => 0);
   const [minimized, setMinimized] = useState(false);
   const [maximized, setMaximized] = useState(true);
   const [showSearch, setShowSearch] = useState(false);
@@ -156,6 +158,7 @@ export default function Archive({
     <div
       className={`archive-board ${incidentEnd === "REPLACEMENT" ? "incident-replacement" : incidentEnd === "PURGE" ? "incident-purged" : ""}`}
       data-incident-stage={portraitStage}
+      data-decay-stage={decayStage}
     >
       <a className="skip-link" href="#archive-main">
         К содержимому
