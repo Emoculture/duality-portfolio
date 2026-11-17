@@ -207,6 +207,62 @@ test("directory labels navigate and shell remains light in dark system mode", as
   ).toBe(true);
 });
 
+test("document, archive and native controls have the same colours in both system themes", async ({
+  page,
+}) => {
+  await openArchive(page);
+  const snapshot = async (scheme: "light" | "dark") => {
+    await page.emulateMedia({ colorScheme: scheme, reducedMotion: "reduce" });
+    await page.reload();
+    await expect(page.locator(".archive-board")).toBeVisible();
+    await page.mouse.move(0, 0);
+
+    const styles = async (selector: string) => {
+      const locator = page.locator(selector).first();
+      await expect(locator).toBeVisible();
+      return locator.evaluate((element) => {
+        const style = getComputedStyle(element);
+        return {
+          color: style.color,
+          background: style.backgroundColor,
+          border: style.borderColor,
+          colorScheme: style.colorScheme,
+          scrollbarColor: style.scrollbarColor,
+        };
+      });
+    };
+
+    const home = {
+      html: await styles("html"),
+      body: await styles("body"),
+      root: await styles("#root"),
+      archive: await styles(".archive-board"),
+      shell: await styles(".ib-shell"),
+      layout: await styles(".retro-layout"),
+      title: await styles(".retro-right h2"),
+      link: await styles(".retro-left .ib-nav button"),
+      button: await styles(".ie-toolbar button:not(:disabled)"),
+    };
+    await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
+    const nav = page.getByRole("navigation", { name: "Разделы INCIDENT 000" });
+    await nav.getByRole("button", { name: "/recovery/", exact: true }).click();
+    const input = await styles('.incident input[placeholder="00:00"]');
+    await nav.getByRole("button", { name: "/cctv/", exact: true }).click();
+    const select = await styles(".incident select");
+    const range = await styles('.incident input[type="range"]');
+    return { home, input, select, range };
+  };
+
+  const light = await snapshot("light");
+  const dark = await snapshot("dark");
+  expect(dark).toEqual(light);
+  for (const element of [light.home.html, light.home.body, light.home.root]) {
+    expect(element.colorScheme).toContain("light");
+  }
+  expect(light.home.archive.background).toBe("rgb(234, 230, 216)");
+  expect(light.home.title.color).toBe("rgb(112, 37, 37)");
+});
+
 test("portrait is static with reduced motion and NORMAL stays unchanged", async ({
   page,
 }) => {
