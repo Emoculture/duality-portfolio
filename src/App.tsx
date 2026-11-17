@@ -3,10 +3,16 @@ import Welcome from "./components/Welcome";
 import Portfolio from "./components/Portfolio";
 import Game from "./components/Game";
 import Archive from "./components/Archive";
+import ArchiveConnection from "./components/ArchiveConnection";
+import ConnectionBoundary from "./components/ConnectionBoundary";
+import PixelCutscene from "./components/PixelCutscene";
+import { add, avatarStage, loadIncident, saveIncident } from "./incident/state";
 import { load, save, type Mode } from "./state";
 export default function App() {
   const [state, setState] = useState(load);
   const [transition, setTransition] = useState(false);
+  const [connection, setConnection] = useState<{ returning: boolean; stage: number; frame: "empty" | "occupied" | null } | null>(null);
+  const [firstContact, setFirstContact] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     save(state);
@@ -18,7 +24,23 @@ export default function App() {
     },
     [],
   );
+  const finishConnection = useCallback(() => {
+    setConnection(null);
+    if (!loadIncident().memory.events.includes("recording:first")) setFirstContact(true);
+  }, []);
+  useEffect(() => {
+    if (!connection) return;
+    const fallback = window.setTimeout(finishConnection, 11000);
+    return () => window.clearTimeout(fallback);
+  }, [connection, finishConnection]);
+  const startConnection = useCallback(() => {
+    const incident = loadIncident();
+    const frame = incident.endings.length ? (incident.memory.events.includes("connection-last-frame") ? "occupied" : "empty") : null;
+    if (frame) saveIncident({ ...incident, memory: { ...incident.memory, events: add(incident.memory.events, "connection-last-frame") } });
+    setConnection({ returning: incident.memory.visits > 0 || incident.visited.length > 0, stage: avatarStage(), frame });
+  }, []);
   const go = useCallback((mode: Mode) => {
+    if (mode === "archive" && loadIncident().endings.length) startConnection();
     setState((s) => ({ ...s, mode }));
     window.scrollTo({ top: 0, behavior: "instant" });
     requestAnimationFrame(() => {
@@ -30,11 +52,12 @@ export default function App() {
         heading.focus({ preventScroll: true });
       }
     });
-  }, []);
+  }, [startConnection]);
   function secret() {
     if (transition) return;
     setTransition(true);
     timer.current = setTimeout(() => {
+      if (state.unlocked) startConnection();
       setState((s) => ({
         ...s,
         discovered: true,
@@ -45,6 +68,7 @@ export default function App() {
     }, 650);
   }
   const win = useCallback(() => {
+    startConnection();
     setState((s) => ({
       ...s,
       unlocked: true,
@@ -52,7 +76,7 @@ export default function App() {
       mode: "archive",
     }));
     window.scrollTo({ top: 0, behavior: "instant" });
-  }, []);
+  }, [startConnection]);
   const reduce = () => setState((s) => ({ ...s, reduced: !s.reduced }));
   return (
     <div className={transition ? "app glitch-entry" : "app"}>
@@ -71,7 +95,7 @@ export default function App() {
       {state.mode === "game" && (
         <Game onExit={() => go("normal")} onWin={win} />
       )}{" "}
-      {state.mode === "archive" && (
+      {state.mode === "archive" && !connection && !firstContact && (
         <Archive
           onExit={() => go("normal")}
           onReplay={() => {
@@ -84,6 +108,12 @@ export default function App() {
           onPuzzle={() => setState((s) => ({ ...s, puzzle: true }))}
         />
       )}
+      {connection && <ConnectionBoundary onFailure={finishConnection}><ArchiveConnection returning={connection.returning} stage={connection.stage} frame={connection.frame} reduced={state.reduced} onComplete={finishConnection} /></ConnectionBoundary>}
+      {firstContact && <PixelCutscene id="first" reduced={state.reduced} onComplete={() => {
+        const latest = loadIncident();
+        saveIncident({ ...latest, memory: { ...latest.memory, events: add(latest.memory.events, "recording:first") } });
+        setFirstContact(false);
+      }} />}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { threads, imageSource } from "../archiveData";
 import { loadIncident } from "../incident/state";
+import { decayStageFor } from "../incident/ArchiveDecayEngine";
 export default function ArchiveThreads({
   selected,
   onSelect,
@@ -12,6 +13,7 @@ export default function ArchiveThreads({
   onImage: (image: string) => void;
 }) {
   const incident = loadIncident();
+  const decay = decayStageFor(incident);
   const recovered =
     incident.clues.includes("log") || incident.lastEnding === "RELEASE";
   function quote(id: string) {
@@ -117,6 +119,7 @@ export default function ArchiveThreads({
                       ? "[восстановлено] Администратор: «Не удаляйте резервную копию. В ней остались не только файлы»."
                       : p.text}
                   </p>
+                  {p.zero && decay >= 2 && <details className="decay-copy"><summary>Повреждённая копия сообщения</summary><p>«Я помню ответ, но запись сохранила только след».</p><small>Оригинальный текст выше сохранён.</small></details>}
                 </div>
               </article>
             ))}

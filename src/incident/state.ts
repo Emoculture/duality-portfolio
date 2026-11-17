@@ -1,4 +1,16 @@
-export type Ending = "PURGE" | "RELEASE" | "REPLACEMENT";
+export type Ending = "PURGE" | "RELEASE" | "REPLACEMENT" | "MEMORY_PROTOCOL";
+export type ArchiveMemory = {
+  version: 1;
+  visits: number;
+  highestChapter: number;
+  events: string[];
+  evidence: string[];
+  recovered: string[];
+  changes: string[];
+  nullChoices: string[];
+  timerDeadline: number | null;
+  adminUnlocked: boolean;
+};
 export type IncidentSave = {
   version: 1;
   visited: string[];
@@ -11,9 +23,11 @@ export type IncidentSave = {
   lastEnding: Ending | null;
   legacyInvestigation: number;
   legacyPuzzle: boolean;
+  memory: ArchiveMemory;
 };
 const KEY = "duality.incident.v1";
 let volatileSave: IncidentSave | null = null;
+let volatileDirty = false;
 const copy = (s: IncidentSave): IncidentSave => ({
   ...s,
   visited: [...s.visited],
@@ -22,7 +36,9 @@ const copy = (s: IncidentSave): IncidentSave => ({
   clues: [...s.clues],
   choices: [...s.choices],
   endings: [...s.endings],
+  memory: { ...s.memory, events: [...s.memory.events], evidence: [...s.memory.evidence], recovered: [...s.memory.recovered], changes: [...s.memory.changes], nullChoices: [...s.memory.nullChoices] },
 });
+const emptyMemory = (): ArchiveMemory => ({ version: 1, visits: 0, highestChapter: 1, events: [], evidence: [], recovered: [], changes: [], nullChoices: [], timerDeadline: null, adminUnlocked: false });
 const empty = (): IncidentSave => ({
   version: 1,
   visited: [],
@@ -35,12 +51,16 @@ const empty = (): IncidentSave => ({
   lastEnding: null,
   legacyInvestigation: 0,
   legacyPuzzle: false,
+  memory: emptyMemory(),
 });
 const strings = (v: unknown): string[] =>
   Array.isArray(v)
     ? v.filter((x): x is string => typeof x === "string").slice(0, 200)
     : [];
 export function loadIncident(): IncidentSave {
+  // If a write was rejected (for example, storage quota), the last successful
+  // disk value is stale. Keep the current session playable from memory.
+  if (volatileDirty && volatileSave) return copy(volatileSave);
   try {
     const raw = localStorage.getItem(KEY);
     if (raw) {
@@ -54,16 +74,28 @@ export function loadIncident(): IncidentSave {
           clues: strings(s.clues),
           choices: strings(s.choices),
           endings: strings(s.endings).filter((e): e is Ending =>
-            ["PURGE", "RELEASE", "REPLACEMENT"].includes(e),
+            ["PURGE", "RELEASE", "REPLACEMENT", "MEMORY_PROTOCOL"].includes(e),
           ),
           systemUnlocked: s.systemUnlocked === true,
-          lastEnding: ["PURGE", "RELEASE", "REPLACEMENT"].includes(s.lastEnding)
+          lastEnding: ["PURGE", "RELEASE", "REPLACEMENT", "MEMORY_PROTOCOL"].includes(s.lastEnding)
             ? s.lastEnding
             : null,
           legacyInvestigation: Number.isInteger(s.legacyInvestigation)
             ? Math.max(0, Math.min(6, s.legacyInvestigation))
             : 0,
           legacyPuzzle: s.legacyPuzzle === true,
+          memory: {
+            version: 1,
+            visits: Number.isSafeInteger(s.memory?.visits) ? Math.max(0, Math.min(100000, s.memory.visits)) : 0,
+            highestChapter: Number.isInteger(s.memory?.highestChapter) ? Math.max(1, Math.min(7, s.memory.highestChapter)) : 1,
+            events: strings(s.memory?.events),
+            evidence: strings(s.memory?.evidence),
+            recovered: strings(s.memory?.recovered),
+            changes: strings(s.memory?.changes),
+            nullChoices: strings(s.memory?.nullChoices),
+            timerDeadline: typeof s.memory?.timerDeadline === "number" && Number.isSafeInteger(s.memory.timerDeadline) && s.memory.timerDeadline >= 0 ? s.memory.timerDeadline : null,
+            adminUnlocked: s.memory?.adminUnlocked === true,
+          },
         };
     }
     if (volatileSave) return copy(volatileSave);
@@ -83,6 +115,7 @@ export function loadIncident(): IncidentSave {
   }
 }
 export function saveIncident(s: IncidentSave) {
+  s = { ...s, memory: { ...s.memory, highestChapter: Math.max(s.memory.highestChapter, Math.min(7, chapter(s) + 1)) } };
   volatileSave = copy(s);
   // saveIncident is called from React state updaters; notify after rendering.
   if (typeof window !== "undefined") {
@@ -92,9 +125,22 @@ export function saveIncident(s: IncidentSave) {
   }
   try {
     localStorage.setItem(KEY, JSON.stringify(s));
+    volatileDirty = false;
   } catch {
-    /* session remains playable */
+    volatileDirty = true;
   }
+  return copy(s);
+}
+/** One entry per actual ARCHIVE mount, independent of navigation within it. */
+export function recordArchiveVisit() {
+  const s = loadIncident();
+  saveIncident({ ...s, memory: { ...s.memory, visits: Math.min(100000, s.memory.visits + 1) } });
+}
+/** Explicit destructive action; does not touch access settings or other saves. */
+export function clearIncidentMemory() {
+  const fresh = empty();
+  saveIncident(fresh);
+  return fresh;
 }
 export function remember(key: "visited" | "threads" | "files", value: string) {
   const s = loadIncident();

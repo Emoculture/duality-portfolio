@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" role="img" aria-labelledby="title">
+  <title id="title">Восстановленный вымышленный кадр комнаты с открытой дверью</title>
+  <defs><filter id="noise"><feTurbulence baseFrequency=".7" numOctaves="3" seed="7"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope=".2"/></feComponentTransfer><feBlend in="SourceGraphic" mode="soft-light"/></filter></defs>
+  <g filter="url(#noise)"><rect width="640" height="400" fill="#1b211d"/><path d="M0 0l200 100v220L0 400zm640 0L440 100v220l200 80z" fill="#464c42"/><path d="M0 400l200-80h240l200 80z" fill="#5b6055"/><path d="M265 135h110v185H265z" fill="#111711" stroke="#777d6d" stroke-width="7"/><path d="M265 138l-35 24v150l35 8z" fill="#888d79" stroke="#555f51" stroke-width="4"/><path d="M282 309l25-142h38l24 142" fill="#7f8d77" opacity=".42"/><path d="M150 70h340M145 80h350" stroke="#8c9482" stroke-width="3"/></g>
+</svg>

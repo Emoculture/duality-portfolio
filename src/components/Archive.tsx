@@ -1,14 +1,20 @@
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { portfolio, projectRepositories } from "../data";
 import { validEcho } from "../state";
 import { boards, threads, imageSource, type ArchivePage } from "../archiveData";
 import ArchiveThreads from "./ArchiveThreads";
 import Investigation from "./Investigation";
 import Incident, { type View as IncidentView } from "../incident/Incident";
-import { avatarStage, loadIncident, remember, subscribeAvatarStage } from "../incident/state";
+import { avatarStage, loadIncident, recordArchiveVisit, remember, subscribeAvatarStage } from "../incident/state";
 import ArchivePortrait from "./ArchivePortrait";
 import ArchiveImage from "./ArchiveImage";
+import ArchiveObserver from "./ArchiveObserver";
+import SoundSetting from "./SoundSetting";
+import { currentDecayStage } from "../incident/ArchiveDecayEngine";
+import ArchiveAnomalyManager from "../incident/ArchiveAnomalyManager";
+import ArchiveDesktop from "./ArchiveDesktop";
 import "../archive.css";
+import "../incident/ArchiveDecayTheme.css";
 const incidentDirectories: Record<IncidentView, string> = {
   journal: "journal", forum: "threads", recovery: "recovery", cctv: "cctv",
   system: "system", history: "history", audio: "audio", dialogue: "user_000", decision: "ending",
@@ -30,6 +36,7 @@ export default function Archive({
 }) {
   const [page, setPage] = useState<ArchivePage>("home");
   const portraitStage = useSyncExternalStore(subscribeAvatarStage, avatarStage, () => 1);
+  const decayStage = useSyncExternalStore(subscribeAvatarStage, currentDecayStage, () => 0 as const);
   const [minimized, setMinimized] = useState(false);
   const [maximized, setMaximized] = useState(true);
   const [showSearch, setShowSearch] = useState(false);
@@ -40,6 +47,8 @@ export default function Archive({
   const [historyIndex, setHistoryIndex] = useState(0);
   const restoring = useRef(false);
   const [settings, setSettings] = useState(false);
+  const [exitWarning, setExitWarning] = useState(false);
+  const reportExitWarning = useCallback((value: boolean) => setExitWarning(value), []);
   const [incidentStart, setIncidentStart] = useState<IncidentView>("journal");
   const [projectFilter, setProjectFilter] = useState("all");
   const [answer, setAnswer] = useState("");
@@ -50,6 +59,13 @@ export default function Archive({
   const [attachment, setAttachment] = useState<string | null>(null);
   const heading = useRef<HTMLElement>(null);
   const lastRoute = useRef({ page, thread });
+  const visitRecorded = useRef(false);
+  useEffect(() => {
+    if (!visitRecorded.current) {
+      visitRecorded.current = true;
+      recordArchiveVisit();
+    }
+  }, []);
   useEffect(() => {
     if (lastRoute.current.page === page && lastRoute.current.thread === thread)
       return;
@@ -146,7 +162,10 @@ export default function Archive({
   return (
     <div
       className={`archive-board ${incidentEnd === "REPLACEMENT" ? "incident-replacement" : incidentEnd === "PURGE" ? "incident-purged" : ""}`}
+      data-incident-stage={portraitStage}
+      data-decay-stage={decayStage}
     >
+      <ArchiveDesktop stage={decayStage} navigate={navigate} onExit={onExit}>
       <a className="skip-link" href="#archive-main">
         К содержимому
       </a>
@@ -214,7 +233,7 @@ export default function Archive({
               >
                 <span>Настройки</span>
               </button>
-              <button onClick={onExit}>Завершить сеанс</button>
+              <button onClick={onExit} aria-label="Завершить сеанс">{exitWarning ? "НЕ УХОДИ" : "Завершить сеанс"}</button>
             </div>
             <div className="ie-address">
               <span>Адрес:</span>
@@ -267,6 +286,7 @@ export default function Archive({
                 <button className="retro-button" onClick={onReplay}>
                   Пройти входную игру заново
                 </button>
+                <SoundSetting className="retro-button" />
                 <p>
                   Повторный вход сбросит допуск к архиву. Дополнительная находка
                   сохранится.
@@ -937,6 +957,8 @@ export default function Archive({
               · <button onClick={onExit}>В обычное портфолио</button>
             </p>
             <p>DUALITY ARCHIVE © 2004–???? · художественный архив</p>
+            <ArchiveObserver stage={portraitStage} />
+            <ArchiveAnomalyManager stage={decayStage} reduced={reduced} onExitWarning={reportExitWarning} />
             <p className="ib-fine">
               Все персонажи, даты и архивные события вымышлены. Изображения —
               авторские иллюстрации.
@@ -945,6 +967,7 @@ export default function Archive({
         </div>
       )}
       <ArchiveImage image={attachment} onClose={() => setAttachment(null)} />
+      </ArchiveDesktop>
     </div>
   );
 }

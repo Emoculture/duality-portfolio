@@ -1,0 +1,50 @@
+/* Story palette is scoped to the archive and never follows OS colour settings. */
+.archive-board[data-decay-stage="1"] .retro-directory-title { color: #775b55; }
+.archive-board[data-decay-stage="2"] { background: #b3b5a5; }
+.archive-board[data-decay-stage="2"] .retro-layout { background-color: #d8d9c6; }
+.archive-board[data-decay-stage="2"] .retro-left,
+.archive-board[data-decay-stage="2"] .retro-right { background: #dcdcca; }
+.archive-board[data-decay-stage="3"], .archive-board[data-decay-stage="4"] { background: #1b211d; color: #d3d8c6; }
+.archive-board[data-decay-stage="3"] .ib-shell, .archive-board[data-decay-stage="4"] .ib-shell { background: #282e29; color: #d9decd; }
+.archive-board[data-decay-stage="3"] .retro-layout, .archive-board[data-decay-stage="4"] .retro-layout { background-color: #292f2b; background-image: none; }
+.archive-board[data-decay-stage="3"] .retro-left, .archive-board[data-decay-stage="3"] .retro-right,
+.archive-board[data-decay-stage="4"] .retro-left, .archive-board[data-decay-stage="4"] .retro-right { background: #313a32; color: #e0e5d3; border-color: #687564; }
+.archive-board[data-decay-stage="3"] .ib-main, .archive-board[data-decay-stage="4"] .ib-main,
+.archive-board[data-decay-stage="3"] .incident, .archive-board[data-decay-stage="4"] .incident { color: #e0e5d3; }
+.archive-board[data-decay-stage="3"] .incident-panel, .archive-board[data-decay-stage="3"] .incident-journal,
+.archive-board[data-decay-stage="3"] .ib-box, .archive-board[data-decay-stage="3"] .retro-main-post,
+.archive-board[data-decay-stage="4"] .incident-panel, .archive-board[data-decay-stage="4"] .incident-journal,
+.archive-board[data-decay-stage="4"] .ib-box, .archive-board[data-decay-stage="4"] .retro-main-post { background: #3a433a; color: #e0e5d3; }
+.archive-board[data-decay-stage="3"] .retro-replies article, .archive-board[data-decay-stage="4"] .retro-replies article,
+.archive-board[data-decay-stage="3"] .ib-reply, .archive-board[data-decay-stage="4"] .ib-reply,
+.archive-board[data-decay-stage="3"] .ib-project, .archive-board[data-decay-stage="4"] .ib-project { background: #4a4244; color: #f0e4e0; }
+.archive-board[data-decay-stage="3"] a, .archive-board[data-decay-stage="4"] a,
+.archive-board[data-decay-stage="3"] .retro-left .ib-nav button, .archive-board[data-decay-stage="4"] .retro-left .ib-nav button,
+.archive-board[data-decay-stage="3"] .ib-link, .archive-board[data-decay-stage="4"] .ib-link,
+.archive-board[data-decay-stage="3"] .retro-right button, .archive-board[data-decay-stage="4"] .retro-right button,
+.archive-board[data-decay-stage="3"] .retro-story-link, .archive-board[data-decay-stage="4"] .retro-story-link { color: #b9d4aa; }
+.archive-board[data-decay-stage="3"] h2, .archive-board[data-decay-stage="3"] h3,
+.archive-board[data-decay-stage="4"] h2, .archive-board[data-decay-stage="4"] h3 { color: #efadaa; }
+.archive-board[data-decay-stage="4"] .retro-layout { background-color: #101711; }
+.archive-board[data-decay-stage="4"] .retro-left, .archive-board[data-decay-stage="4"] .retro-right { background: #1e2920; }
+.archive-board[data-decay-stage="3"] .ib-box > h2, .archive-board[data-decay-stage="4"] .ib-box > h2 { background: #514640; color: #f0c2bb; }
+.archive-board[data-decay-stage="3"] .retro-main-post header button, .archive-board[data-decay-stage="4"] .retro-main-post header button,
+.archive-board[data-decay-stage="3"] .retro-replies header button, .archive-board[data-decay-stage="4"] .retro-replies header button,
+.archive-board[data-decay-stage="3"] .retro-replies p button, .archive-board[data-decay-stage="4"] .retro-replies p button,
+.archive-board[data-decay-stage="3"] .retro-status button, .archive-board[data-decay-stage="4"] .retro-status button,
+.archive-board[data-decay-stage="3"] .ib-quote, .archive-board[data-decay-stage="4"] .ib-quote { color: #f0b7ad; }
+.archive-board[data-decay-stage="3"] .archive-observer, .archive-board[data-decay-stage="4"] .archive-observer,
+.archive-board[data-decay-stage="3"] .ib-stats-note, .archive-board[data-decay-stage="4"] .ib-stats-note { color: #d4c6b5; }
+.archive-board[data-decay-stage="3"] .recovered-collection h4, .archive-board[data-decay-stage="4"] .recovered-collection h4 { color: #f0b8b0; }
+.archive-board[data-decay-stage="2"] .recovered-collection, .archive-board[data-decay-stage="3"] .recovered-collection, .archive-board[data-decay-stage="4"] .recovered-collection { border-left: 3px dashed #aa8277; }
+.decay-chair { margin: 10px 0; max-width: 320px; }
+.decay-chair svg { display: block; width: 100%; image-rendering: pixelated; }
+.decay-copy, .decay-null-note { border-left: 2px solid #ba8e81; padding-left: 6px; }
+.archive-board[data-decay-stage="3"] .memory-camera img, .archive-board[data-decay-stage="4"] .memory-camera img { filter: grayscale(1) contrast(1.2); }
+.decay-signal { font: 11px/1.4 "Courier New", monospace; color: #91615a; }
+.archive-board[data-decay-stage="3"] .decay-signal, .archive-board[data-decay-stage="4"] .decay-signal { color: #e3a7a0; }
+.decay-transition { position: fixed; z-index: 9998; left: 50%; top: 15%; transform: translateX(-50%); width: min(360px, 88vw); padding: 10px; background: #272d27; color: #d7e5cf; border: 2px outset #9ba092; font: 12px/1.5 "Courier New", monospace; pointer-events: none; }
+.decay-transition button { pointer-events: auto; border: 2px outset #ddd; background: #ccc; color: #111; padding: 6px; }
+.decay-fake-cursor { position: absolute; left: 8%; top: 70%; color: #e8ede0; animation: decay-cursor 3s ease-in-out forwards; }
+@keyframes decay-cursor { to { transform: translate(180px, -35px); } }
+@media (prefers-reduced-motion: reduce) { .decay-fake-cursor { animation: none; } }

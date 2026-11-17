@@ -1,0 +1,20 @@
+.connection-screen { position: fixed; inset: 0; z-index: 9999; min-height: 100dvh; overflow: auto; background: #080d09; color: #92bd89; padding: max(20px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); font: 15px/1.6 "Courier New", monospace; }
+.connection-screen::after { content: ""; position: fixed; inset: 0; pointer-events: none; background: repeating-linear-gradient(transparent 0 3px, #0004 4px); opacity: .32; }
+.connection-monitor { position: relative; max-width: 680px; min-height: 70dvh; margin: auto; padding: 20px; border: 2px solid #263a29; background: #0c130d; box-shadow: inset 0 0 45px #000; overflow-wrap: anywhere; }
+.connection-screen h1 { font: bold 15px/1.4 "Courier New", monospace; letter-spacing: .08em; color: #a3c69b; }
+.connection-screen p { margin: 0 0 1em; }
+.connection-log { margin-top: 2em; }
+.connection-log::after { content: "_"; display: inline-block; animation: connection-cursor 1.1s steps(1) infinite; }
+.connection-log p { animation: connection-line .35s ease-out both; }
+.connection-error { color: #c77570; }
+.connection-window { position: relative; z-index: 1; padding: 12px; border: 2px outset #818981; background: #c6c8bc; color: #18251a; }
+.connection-progress { height: 20px; border: 2px inset #eee; background: #eeeee2; }
+.connection-progress span { display: block; height: 100%; background: #365f42; }
+.connection-face { position: absolute; width: min(180px, 40%); height: 180px; object-fit: cover; top: 30%; right: 5%; opacity: .27; clip-path: inset(0 52% 25% 0); image-rendering: pixelated; pointer-events: none; }
+.connection-black { position: fixed; z-index: 4; inset: 0; background: #050705; pointer-events: none; }
+.connection-last-frame { position: absolute; z-index: 2; top: 34%; right: 5%; width: min(240px, 60%); border: 1px solid #667b65; image-rendering: pixelated; }
+.connection-final { color: #d5dfcf; margin-top: 3em !important; }
+.connection-skip { position: relative; z-index: 3; padding: 10px 16px; border: 2px outset #c6c6bb; background: #c6c6bb; color: #141a14; font: inherit; cursor: pointer; }
+@keyframes connection-cursor { 50% { opacity: 0; } }
+@keyframes connection-line { from { opacity: .25; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .connection-screen::after { display: none; } .connection-log::after, .connection-log p { animation: none; } }

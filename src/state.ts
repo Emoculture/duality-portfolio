@@ -17,11 +17,8 @@ export function load(): Progress {
   try {
     const value = JSON.parse(localStorage.getItem("duality.v1") || "{}");
     return {
-      mode: ["normal", "game", "archive"].includes(value.mode)
-        ? value.mode === "archive" && value.unlocked !== true
-          ? "game"
-          : value.mode
-        : "welcome",
+      // Navigation is session-only: every new document starts at WELCOME.
+      mode: "welcome",
       unlocked: value.unlocked === true,
       reduced: value.reduced === true,
       discovered: value.discovered === true,
@@ -33,7 +30,10 @@ export function load(): Progress {
 }
 export function save(value: Progress) {
   try {
-    localStorage.setItem("duality.v1", JSON.stringify(value));
+    let previous: unknown = {};
+    try { previous = JSON.parse(localStorage.getItem("duality.v1") || "{}"); } catch { /* damaged legacy value */ }
+    const retained = previous && typeof previous === "object" && !Array.isArray(previous) ? previous : {};
+    localStorage.setItem("duality.v1", JSON.stringify({ ...retained, ...value }));
   } catch {
     /* Private browsing may deny persistence; the session still works. */
   }

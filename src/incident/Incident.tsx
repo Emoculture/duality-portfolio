@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   add,
   chapter,
+  clearIncidentMemory,
   loadIncident,
   saveIncident,
   steps,
@@ -10,6 +11,9 @@ import {
 } from "./state";
 import Desktop from "./Desktop";
 import History from "./History";
+import MemoryCase from "./MemoryCase";
+import MemoryProtocol from "./MemoryProtocol";
+import PixelCutscene, { recordings, type RecordingId } from "../components/PixelCutscene";
 import "./incident.css";
 export type View =
   | "journal"
@@ -98,6 +102,8 @@ export default function Incident({
   );
   const [finalAnswer, setFinalAnswer] = useState("");
   const [reset, setReset] = useState(false);
+  const [erase, setErase] = useState(false);
+  const [recording, setRecording] = useState<{ id: RecordingId; replay: boolean } | null>(null);
   useEffect(() => {
     if (initialView === "journal")
       update((s) => ({ ...s, visited: add(s.visited, "journal") }));
@@ -105,6 +111,20 @@ export default function Incident({
   useEffect(() => {
     setView(initialView);
   }, [initialView]);
+  useEffect(() => {
+    if (save.memory.timerDeadline === null || save.memory.events.includes("midnight")) return;
+    const timer = window.setTimeout(() => {
+      update((s) => ({ ...s, memory: { ...s.memory, events: add(s.memory.events, "midnight"), evidence: add(s.memory.evidence, "midnight") } }));
+    }, Math.max(0, Math.min(2147483647, save.memory.timerDeadline - Date.now())));
+    return () => window.clearTimeout(timer);
+  }, [save.memory.timerDeadline, save.memory.events]);
+  useEffect(() => {
+    if (recording) return;
+    const pending: RecordingId | null = view === "recovery" && save.memory.recovered.includes("CASE_LOG") && !save.memory.events.includes("recording:recording") ? "recording"
+      : view === "dialogue" && save.memory.events.includes("null-complete") && !save.memory.events.includes("recording:two") ? "two"
+      : view === "decision" && save.clues.includes("finalkey") && !save.memory.events.includes("recording:final") ? "final" : null;
+    if (pending) setRecording({ id: pending, replay: false });
+  }, [view, save.memory.recovered, save.memory.events, save.clues, recording]);
   function changeView(next: View) {
     setView(next);
     onViewChange?.(next);
@@ -117,9 +137,9 @@ export default function Incident({
         visited: [...new Set([...s.visited, ...latest.visited])],
         threads: [...new Set([...s.threads, ...latest.threads])],
         files: [...new Set([...s.files, ...latest.files])],
+        memory: latest.memory,
       });
-      saveIncident(n);
-      return n;
+      return saveIncident(n);
     });
   }
   function clue(id: string) {
@@ -132,8 +152,9 @@ export default function Incident({
     clue(id);
     setFeedback("Запись восстановлена и добавлена в журнал.");
   }
-  function resetProgress() {
-    update((s) => ({
+  function resetProgress(eraseAll = false) {
+    if (eraseAll) setSave(clearIncidentMemory());
+    else update((s) => ({
       ...s,
       visited: [],
       threads: [],
@@ -142,8 +163,10 @@ export default function Incident({
       choices: [],
       systemUnlocked: false,
       lastEnding: null,
+      memory: { ...s.memory, evidence: [], recovered: [], changes: [], nullChoices: [], timerDeadline: null, adminUnlocked: false, events: [] },
     }));
     setReset(false);
+    setErase(false);
     setPieces([2, 1, 3, 4, 6, 5]);
     setSelected(null);
     setLog1("");
@@ -160,6 +183,9 @@ export default function Incident({
     changeView("journal");
   }
   const current = chapter(save);
+  const memoryEndingReady = save.memory.recovered.includes("LETTER") &&
+    ["forum", "camera000", "midnight", "null", "admin", "contradiction"].every((item) => save.memory.evidence.includes(item)) &&
+    save.memory.events.includes("null-complete") && save.memory.adminUnlocked;
   const messages = save.systemUnlocked
     ? "Я помню этот рабочий стол. Но не помню, кто вернулся."
     : save.clues.includes("log")
@@ -249,6 +275,19 @@ export default function Incident({
             <p>
               Глава: {Math.min(current + 1, 7)}/7 · улик: {save.clues.length}
             </p>
+            <p>
+              Входов в архив: {save.memory.visits} · максимальная глава: {save.memory.highestChapter}/7
+              {save.memory.visits > 1 && <> · Ты снова здесь.</>}
+            </p>
+            <MemoryCase view="journal" save={save} update={update} />
+            <MemoryProtocol view="journal" save={save} update={update} />
+            <section className="incident-panel" aria-label="Журнал записей">
+              <h3>/recordings/</h3>
+              {(Object.keys(recordings) as RecordingId[]).map((id) => {
+                const seen = save.memory.events.includes(`recording:${id}`);
+                return <p key={id}><button disabled={!seen} onClick={() => setRecording({ id, replay: true })}>{recordings[id].title}</button>{seen ? " — просмотрено" : " — повреждено / заблокировано"}</p>;
+              })}
+            </section>
             {steps.map((s, i) => (
               <p key={s}>
                 [{save.clues.includes(s) ? "X" : " "}] {chapterNames[i]} —{" "}
@@ -279,8 +318,16 @@ export default function Incident({
                   Сбросить расследование? Открытые концовки и прежние сохранения
                   останутся.
                 </p>
-                <button onClick={resetProgress}>Да, начать заново</button>{" "}
+                <button onClick={() => resetProgress()}>Да, начать заново</button>{" "}
                 <button onClick={() => setReset(false)}>Отмена</button>
+              </div>
+            )}
+            <button onClick={() => setErase(true)}>Удалить все игровые воспоминания</button>
+            {erase && (
+              <div role="alert">
+                <p>Удалить прогресс INCIDENT, посещения, выборы и открытые концовки на этом устройстве? Доступ к архиву, настройки и другие сохранения останутся.</p>
+                <button onClick={() => resetProgress(true)}>Да, удалить воспоминания</button>{" "}
+                <button onClick={() => setErase(false)}>Отмена</button>
               </div>
             )}
           </div>
@@ -288,6 +335,7 @@ export default function Incident({
       )}
       {view === "forum" && (
         <>
+          <MemoryCase view="forum" save={save} update={update} />
           <article className="incident-panel">
             <h3>No.1273 / 17.04.2004 00:01</h3>
             <p>Anonymous: «На форуме снова пропала аватарка. У кого так же?»</p>
@@ -330,6 +378,7 @@ export default function Incident({
       )}
       {view === "recovery" && (
         <>
+          <MemoryCase view="recovery" save={save} update={update} />
           <article className="incident-panel">
             <h3>IMAGE_017.JPG</h3>
             <p>
@@ -491,6 +540,7 @@ export default function Incident({
       )}
       {view === "cctv" && (
         <div className="incident-panel">
+          <MemoryCase view="cctv" save={save} update={update} />
           <h3>Архивные кадры наблюдения</h3>
           <p>
             Это отдельные неподвижные кадры, не видеозапись. Сверьте CAM_03 с
@@ -665,6 +715,7 @@ export default function Incident({
       )}
       {view === "dialogue" && (
         <div className="incident-panel">
+          <MemoryProtocol view="dialogue" save={save} update={update} />
           <h3>Соединение с №000</h3>
           <p>№000: «{messages}»</p>
           {save.clues.includes("system") ? (
@@ -769,6 +820,7 @@ export default function Incident({
                 <button onClick={() => finish("REPLACEMENT")}>
                   Стать администратором
                 </button>
+                {memoryEndingReady && <button onClick={() => finish("MEMORY_PROTOCOL")}>Запустить MEMORY PROTOCOL</button>}
               </div>
             </>
           )}
@@ -805,7 +857,7 @@ export default function Incident({
                     сохранённой памятью.
                   </p>
                 </>
-              ) : (
+              ) : save.lastEnding === "REPLACEMENT" ? (
                 <>
                   <strong>WELCOME BACK, ADMINISTRATOR</strong>
                   <p>
@@ -818,6 +870,17 @@ export default function Incident({
                     решение.
                   </p>
                 </>
+              ) : (
+                <>
+                  <strong>MEMORY PROTOCOL</strong>
+                  {save.memory.nullChoices[1] === "memory" && <p>В журнале сохранена версия воспоминания NULL, вместе с её противоречием записи.</p>}
+                  {save.memory.nullChoices[1] === "record" && <p>В журнале сохранена версия записи; её происхождение остаётся под вопросом.</p>}
+                  {save.memory.recovered.includes("CASE_LOG") && <p>Восстановленный SERVER_2007.LOG показывает: копия предшествовала попытке восстановления 2007 года.</p>}
+                  {save.memory.recovered.includes("CASE_PHOTO") && <p>На фотографии комната не совпадает со схемой: место могло сохраниться только в записи.</p>}
+                  {save.memory.recovered.includes("CASE_VOICE") && <p>Восстановленная расшифровка оставляет вопрос без ответа: кто просил записать след?</p>}
+                  <p>Записи сходятся: копия существовала до удаления, а сигнал появился до команды восстановления. Архив мог сохранять не человека целиком, а способ отвечать вместо него.</p>
+                  <p>NULL: «Если кто-то продолжает разговор, значит ли это, что кто-то вернулся?» Ответ остаётся в журнале, но его источник по-прежнему неизвестен.</p>
+                </>
               )}
               <p>Открытые финалы: {save.endings.join(", ")}</p>
               <button onClick={() => setReset(true)}>
@@ -826,7 +889,7 @@ export default function Incident({
               {reset && (
                 <div role="alert">
                   <p>Начать заново? Открытые концовки останутся.</p>
-                  <button onClick={resetProgress}>
+                  <button onClick={() => resetProgress()}>
                     Да, начать заново
                   </button>{" "}
                   <button onClick={() => setReset(false)}>Отмена</button>
@@ -836,6 +899,10 @@ export default function Incident({
           )}
         </div>
       )}
+      {recording && <PixelCutscene key={`${recording.id}-${recording.replay}`} id={recording.id} replay={recording.replay} completed={save.endings.length > 0} onComplete={() => {
+        if (!recording.replay) update((s) => ({ ...s, memory: { ...s.memory, events: add(s.memory.events, `recording:${recording.id}`) } }));
+        setRecording(null);
+      }} />}
     </section>
   );
 }
