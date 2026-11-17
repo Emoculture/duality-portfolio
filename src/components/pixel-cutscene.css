@@ -2,6 +2,8 @@
 .pixel-room { position: relative; min-height: calc(100dvh - 24px); max-width: 850px; margin: auto; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; background: linear-gradient(90deg, #101611, #252d22 50%, #0e110f); border: 2px ridge #65705f; }
 .pixel-room::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(transparent 0 3px, #0004 4px); opacity: .25; }
 .pixel-time { position: absolute; top: 8px; left: 12px; z-index: 2; font-size: 11px; color: #a8b49f; }
+.pixel-monitor { position: absolute; left: 7%; top: 32%; width: 18%; aspect-ratio: 4 / 3; background: #353a31; border: 5px ridge #51594c; box-shadow: 0 8px #171d17; }
+.pixel-monitor span { display: block; width: 100%; height: 100%; border: 5px solid #171d17; background: #344b36; box-shadow: 0 0 25px #48634866; }
 .witness-frame { position: absolute; bottom: 100px; left: 50%; width: min(70vw, 470px, 65vh); aspect-ratio: 1312 / 1199; transform: translateX(-50%); animation: witness-breathe 8s ease-in-out infinite; }
 .witness-sprite, .witness-mouth { display: block; width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; }
 .witness-mouth { position: absolute; inset: 0; clip-path: inset(50% 43% 45% 43%); opacity: 0; }
@@ -17,3 +19,4 @@
 .pixel-dialogue button { min-height: 44px; padding: 8px 12px; border: 2px outset #d4d3c8; border-radius: 0; background: #c4c5b9; color: #171c16; font: inherit; }
 .pixel-anomaly { position: absolute; top: 14%; left: 8%; z-index: 2; color: #d2d9c9; }
 @media (prefers-reduced-motion: reduce) { .pixel-room::after { display: none; } .witness-frame, .witness-mouth, .witness-blink { animation: none; } .witness-mouth, .witness-blink { opacity: 0; } }
+@media (max-width: 520px) { .witness-frame { bottom: 210px; width: min(78vw, 58vh); } .pixel-monitor { left: 5%; top: 28%; width: 23%; } }

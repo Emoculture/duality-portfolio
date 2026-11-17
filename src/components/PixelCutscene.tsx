@@ -39,6 +39,7 @@ export default function PixelCutscene({ id, replay = false, completed = false, r
   return <main className="pixel-cutscene" aria-label={item.title}>
     <div className={`pixel-room pixel-${id}`}>
       <p className="pixel-time">{item.title} / {replay && completed && id === "first" ? "2004.13.40" : "00:0" + line}</p>
+      <div className="pixel-monitor" aria-hidden="true"><span /></div>
       {!failed ? <div className={`witness-frame ${visible < text.length ? "witness-talking" : "witness-idle"} ${id === "two" && line === 0 ? "witness-looking-down" : ""} ${id === "recording" && line === 2 ? "witness-glitch" : ""}`}>
         <img className="witness-sprite" src="/archive/witness/witness-master.png" alt="THE WITNESS, вымышленный персонаж записи" onError={() => setFailed(true)} />
         <img className="witness-mouth" src="/archive/witness/witness-master.png" alt="" aria-hidden="true" />
