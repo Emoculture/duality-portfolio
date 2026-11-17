@@ -1,4 +1,5 @@
 import { threads, imageSource } from "../archiveData";
+import { loadIncident } from "../incident/state";
 export default function ArchiveThreads({
   selected,
   onSelect,
@@ -10,6 +11,9 @@ export default function ArchiveThreads({
   onAfter: () => void;
   onImage: (image: string) => void;
 }) {
+  const incident = loadIncident();
+  const recovered =
+    incident.clues.includes("log") || incident.lastEnding === "RELEASE";
   function quote(id: string) {
     const thread = threads.find((t) => t.posts.some((p) => p.id === id));
     if (thread) {
@@ -25,7 +29,8 @@ export default function ArchiveThreads({
     <div className="ib-thread-board">
       <h2>/x/ — Паранормальное</h2>
       <p className="ib-board-description">
-        Кто оставил свет? / 3 треда · архив закрыт для новых ответов
+        Кто оставил свет? / {threads.length} тредов · архив закрыт для новых
+        ответов
       </p>
       {selected && (
         <button className="ib-link" onClick={() => onSelect(null)}>
@@ -107,7 +112,11 @@ export default function ArchiveThreads({
                     </a>
                   )}
                   {p.green && <p className="ib-greentext">{p.green}</p>}
-                  <p>{p.text}</p>
+                  <p>
+                    {p.id === "1370" && recovered
+                      ? "[восстановлено] Администратор: «Не удаляйте резервную копию. В ней остались не только файлы»."
+                      : p.text}
+                  </p>
                 </div>
               </article>
             ))}

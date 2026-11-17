@@ -4,6 +4,8 @@ import { validEcho } from "../state";
 import { boards, threads, imageSource, type ArchivePage } from "../archiveData";
 import ArchiveThreads from "./ArchiveThreads";
 import Investigation from "./Investigation";
+import Incident, { type View as IncidentView } from "../incident/Incident";
+import { loadIncident, remember } from "../incident/state";
 import ArchiveImage from "./ArchiveImage";
 import "../archive.css";
 export default function Archive({
@@ -27,11 +29,12 @@ export default function Archive({
   const [showSearch, setShowSearch] = useState(false);
   const [search, setSearch] = useState("");
   const [history, setHistory] = useState<
-    { page: ArchivePage; thread: string | null; opened: string }[]
-  >([{ page: "home", thread: null, opened: "readme" }]);
+    { page: ArchivePage; thread: string | null; opened: string; view: IncidentView }[]
+  >([{ page: "home", thread: null, opened: "readme", view: "journal" }]);
   const [historyIndex, setHistoryIndex] = useState(0);
   const restoring = useRef(false);
   const [settings, setSettings] = useState(false);
+  const [incidentStart, setIncidentStart] = useState<IncidentView>("journal");
   const [projectFilter, setProjectFilter] = useState("all");
   const [answer, setAnswer] = useState("");
   const [feedback, setFeedback] = useState("");
@@ -54,19 +57,33 @@ export default function Archive({
       return;
     }
     const current = history[historyIndex];
+    const view = page === "incident" ? incidentStart : "journal";
     if (
       current &&
       current.page === page &&
       current.thread === thread &&
-      current.opened === opened
+      current.opened === opened &&
+      current.view === view
     )
       return;
     const next = history
       .slice(0, historyIndex + 1)
-      .concat({ page, thread, opened });
+      .concat({ page, thread, opened, view });
     setHistory(next);
     setHistoryIndex(next.length - 1);
+  }, [page, thread, opened, incidentStart]);
+  useEffect(() => {
+    remember("visited", page);
+    if (page === "threads" && thread) remember("threads", thread);
+    if (page === "files") {
+      const filenames: Record<string, string> = {readme: "README.NFO", after: "AFTER.TXT", null: "000.TXT"};
+      remember("files", filenames[opened] || opened);
+    }
+    if (page === "logs") remember("files", "LOG_2004.TXT");
   }, [page, thread, opened]);
+  useEffect(() => {
+    if (attachment) remember("files", attachment === "corridor" ? "IMAGE_017.JPG" : attachment);
+  }, [attachment]);
   function moveHistory(delta: number) {
     const index = historyIndex + delta;
     const entry = history[index];
@@ -76,6 +93,7 @@ export default function Archive({
     setPage(entry.page);
     setThread(entry.thread);
     setOpened(entry.opened);
+    setIncidentStart(entry.view);
     setAttachment(null);
   }
   function quoteOnHome(id: string) {
@@ -118,8 +136,11 @@ export default function Archive({
       )}
     </nav>
   );
+  const incidentEnd = loadIncident().lastEnding;
   return (
-    <div className="archive-board">
+    <div
+      className={`archive-board ${incidentEnd === "REPLACEMENT" ? "incident-replacement" : incidentEnd === "PURGE" ? "incident-purged" : ""}`}
+    >
       <a className="skip-link" href="#archive-main">
         К содержимому
       </a>
@@ -192,7 +213,8 @@ export default function Archive({
             <div className="ie-address">
               <span>Адрес:</span>
               <span className="ie-address-value">
-                ▣ http://archive.local/{page === "home" ? "" : page + "/"}
+                ▣ http://archive.local/
+                {page === "home" ? "" : page === "incident" ? incidentStart + "/" : page + "/"}
               </span>
               <button
                 onClick={() => navigate("home")}
@@ -295,6 +317,10 @@ export default function Archive({
               >
                 INVESTIGATION.TXT
               </button>
+              <button className="retro-story-link" onClick={() => {
+                setIncidentStart("journal");
+                navigate("incident");
+              }}>INCIDENT_000.TXT</button>
             </aside>
             <main
               id="archive-main"
@@ -302,7 +328,17 @@ export default function Archive({
               tabIndex={-1}
               className="ib-main"
             >
-              {page === "home" && (
+              {page === "home" && incidentEnd === "PURGE" && (
+                <section className="purged-home" role="status">
+                  <strong>ARCHIVE DELETED</strong>
+                  <p>1 FILE REMAINS</p>
+                  <button onClick={() => {
+                    setIncidentStart("journal");
+                    navigate("incident");
+                  }}>Открыть оставшийся файл</button>
+                </section>
+              )}
+              {page === "home" && incidentEnd !== "PURGE" && (
                 <>
                   <section className="retro-banner">
                     <div
@@ -457,7 +493,7 @@ export default function Archive({
                       Popular Threads <span>Из последней копии</span>
                     </h2>
                     <div className="ib-popular">
-                      {threads.map((t) => (
+                      {threads.slice(0, 3).map((t) => (
                         <article key={t.id}>
                           <h3>
                             <button onClick={() => openThread(t.id)}>
@@ -725,6 +761,9 @@ export default function Archive({
               )}
 
               {page === "investigation" && <Investigation />}
+              {page === "incident" && (
+                <Incident initialView={incidentStart} onViewChange={setIncidentStart} />
+              )}
               {page === "threads" && (
                 <ArchiveThreads
                   selected={thread}
@@ -834,6 +873,12 @@ export default function Archive({
               <section>
                 <h2>/файлы/</h2>
                 <ul>
+                  <li>
+                    <button onClick={() => {
+                      setIncidentStart("system");
+                      navigate("incident");
+                    }}>▤ &nbsp;SYSTEM_RECOVERY.EXE</button>
+                  </li>
                   <li>
                     <button
                       onClick={() => {

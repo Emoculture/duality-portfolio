@@ -1,0 +1,375 @@
+.incident {
+  font:
+    13px/1.55 "Courier New",
+    monospace;
+  color: #191919;
+  overflow-wrap: anywhere;
+}
+.incident h2 {
+  font:
+    bold 18px "Courier New",
+    monospace;
+  color: #6f1717;
+}
+.incident h3 {
+  font:
+    bold 14px "Courier New",
+    monospace;
+  color: #6f1717;
+}
+.incident button,
+.incident select {
+  font:
+    12px "Courier New",
+    monospace;
+  color: #14145d;
+  background: #d2d0c8;
+  border: 2px outset #f4f4e8;
+  border-radius: 0;
+  padding: 7px;
+  min-height: 38px;
+}
+.incident button:disabled {
+  color: #777;
+}
+.incident input {
+  font:
+    16px "Courier New",
+    monospace;
+  max-width: 100%;
+  min-height: 40px;
+}
+.incident-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 10px 0;
+}
+.incident-panel {
+  padding: 10px;
+  border: 1px solid #8e8a7e;
+  background: #e5e2d8;
+  margin: 10px 0;
+}
+.incident-panel pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font:
+    12px/1.6 "Courier New",
+    monospace;
+}
+.incident-journal {
+  background: #f3f0df;
+  border: 1px solid #999;
+  padding: 9px;
+  margin: 12px 0;
+}
+.incident-hint {
+  margin: 10px 0;
+}
+.incident-hint p {
+  margin: 3px;
+}
+.incident-error {
+  color: #8d1717;
+}
+.camera-frame {
+  position: relative;
+  background: #161916;
+  max-width: 560px;
+}
+.camera-frame img {
+  display: block;
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  filter: grayscale(1);
+}
+.camera-caption {
+  position: absolute;
+  left: 5px;
+  bottom: 5px;
+  color: #e4e8d7;
+  background: #000b;
+  padding: 3px;
+}
+.camera-figure {
+  position: absolute;
+  left: 51%;
+  bottom: 20%;
+  width: 18px;
+  height: 47px;
+  border-radius: 45% 45% 10% 10%;
+  background: #151515;
+  box-shadow: 0 0 2px #aaa;
+}
+.camera-figure:before {
+  content: "";
+  position: absolute;
+  top: -9px;
+  left: 4px;
+  width: 10px;
+  height: 12px;
+  background: #181818;
+  border-radius: 50%;
+}
+.recovery-pieces {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 3px;
+  max-width: 420px;
+}
+.recovery-pieces button {
+  aspect-ratio: 1.2;
+  background-image: url("/archive/camera-stair.svg");
+  background-size: 300% 200%;
+  color: white;
+  text-shadow: 1px 1px 3px black;
+}
+.incident-ending {
+  background: #151b15;
+  color: #d2d9c6;
+  border: 2px inset #ccc;
+  padding: 20px;
+}
+.incident-ending strong {
+  font-size: 20px;
+}
+.system-desktop {
+  background: #477675;
+  min-height: 360px;
+  padding: 10px;
+  position: relative;
+  color: #fff;
+}
+.system-icons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.system-icons button {
+  width: 100px;
+}
+.system-window {
+  position: relative;
+  border: 2px outset #eee;
+  background: #d3d3ca;
+  color: #111;
+  padding: 3px;
+  margin: 10px 0;
+  max-width: min(650px, calc(100% - 40px));
+  margin-left: 20px;
+}
+.system-title {
+  background: #112c70;
+  color: #fff;
+  padding: 5px;
+  display: flex;
+  justify-content: space-between;
+}
+.system-body {
+  padding: 10px;
+  color: #111;
+  background: #f8f7eb;
+  min-height: 100px;
+}
+.system-taskbar {
+  background: #bfc4bb;
+  color: #111;
+  padding: 5px;
+  margin-top: 10px;
+}
+.terminal-output {
+  background: #111;
+  color: #c7d6bf;
+  max-height: 240px;
+  overflow: auto;
+  padding: 8px;
+}
+.terminal-output pre {
+  margin: 0;
+}
+.terminal-form {
+  display: flex;
+  gap: 5px;
+}
+.terminal-form input {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+}
+.incident-choice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.incident details summary {
+  cursor: pointer;
+  padding: 8px;
+}
+.incident-status {
+  font-size: 11px;
+  color: #555;
+}
+@media (max-width: 520px) {
+  .incident {
+    font-size: 13px;
+  }
+  .camera-frame img {
+    height: 170px;
+  }
+  .system-icons button {
+    width: auto;
+    flex: 1 1 40%;
+  }
+  .terminal-form {
+    flex-wrap: wrap;
+  }
+  .terminal-form input {
+    width: 100%;
+    flex-basis: 100%;
+  }
+}
+.incident audio {
+  display: block;
+  width: min(100%, 420px);
+  height: 40px;
+  margin: 6px 0;
+}
+.incident article h4 {
+  margin: 12px 0 4px;
+}
+.archive-board.incident-replacement .retro-layout {
+  background-color: #b9bdab;
+}
+.archive-board.incident-replacement .ie-titlebar {
+  background: #233729;
+}
+.archive-board.incident-replacement .retro-banner {
+  border-color: #789371;
+}
+.history-version {
+  border: 2px ridge #bbb;
+  background: #faf3da;
+  padding: 12px;
+  margin-top: 8px;
+}
+.history-version header {
+  font:
+    bold 15px Georgia,
+    serif;
+  border-bottom: 1px solid #777;
+  padding: 5px;
+}
+.history-version pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: 12px/1.5 monospace;
+}
+.history-incident {
+  background: #e8dfd2;
+  border-color: #894f45;
+}
+.history-incident header {
+  color: #7f221b;
+}
+.history-recovery {
+  background: #c8cebd;
+  border-color: #7b8574;
+}
+.history-recovery header {
+  font-family: monospace;
+  color: #324e35;
+}
+.history-restored {
+  background: #dad8cf;
+  border-color: #8c8c8c;
+}
+.history-restored header {
+  background: #10266d;
+  color: #fff;
+  font: 12px Arial;
+  padding: 5px;
+}
+.ending-purge {
+  animation: incident-purge 1.4s ease-out both;
+}
+@keyframes incident-purge {
+  0% {
+    opacity: 0.25;
+    filter: grayscale(1);
+  }
+  100% {
+    opacity: 1;
+    filter: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ending-purge {
+    animation: none;
+  }
+}
+html[data-reduced="true"] .ending-purge {
+  animation: none;
+}
+.archive-board.incident-purged .purged-home {
+  min-height: 240px;
+  background: #171c19;
+  color: #c9d4c4;
+  padding: 30px;
+  font:
+    16px "Courier New",
+    monospace;
+  animation: purge-appear 1s ease-out;
+}
+.purged-home strong {
+  font-size: 22px;
+}
+.purged-home button {
+  background: none;
+  border: 0;
+  color: #d5e8d0;
+  text-decoration: underline;
+  padding: 10px 0;
+}
+@keyframes purge-appear {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .archive-board.incident-purged .purged-home {
+    animation: none;
+  }
+}
+html[data-reduced="true"] .archive-board.incident-purged .purged-home {
+  animation: none;
+}
+.terminal-output pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.camera-frame {
+  overflow: hidden;
+}
+.camera-zoom img,
+.camera-zoom .camera-figure {
+  transform: scale(1.6);
+}
+/* Navigation between old-style windows should not animate page scrolling. */
+html:has(.archive-board) {
+  scroll-behavior: auto;
+}
+.system-taskbar {
+  position: relative;
+  z-index: 5;
+}
+/* Text files wrap within the virtual desktop on narrow screens. */
+.system-body pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}
