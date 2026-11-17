@@ -22,3 +22,24 @@ for (const previousMode of ["normal", "game", "archive"] as const) {
     expect(settings.sound).toBe("true");
   });
 }
+
+test("visible square starts the puzzle for a new visitor and old hidden entry remains", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByRole("button", { name: "Войти на сайт" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Неизвестный объект" })).toHaveText("?");
+  await expect(page.getByRole("button", { name: "Исследовать деталь" })).toBeAttached();
+  await page.getByRole("button", { name: "Неизвестный объект" }).click();
+  await expect(page.getByRole("heading", { name: "README.TXT" })).toBeVisible();
+});
+
+test("unlocked visitor returns through connection without losing clues", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.addInitScript(() => {
+    localStorage.setItem("duality.v1", JSON.stringify({ mode: "archive", unlocked: true, discovered: true }));
+    localStorage.setItem("duality.incident.v1", JSON.stringify({ version: 1, clues: ["thread", "moderator"], memory: { visits: 2 } }));
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Неизвестный объект" }).click();
+  await expect(page.locator(".connection-screen")).toBeVisible();
+  await expect(page.locator(".archive-board")).toHaveAttribute("data-incident-stage", "3");
+});

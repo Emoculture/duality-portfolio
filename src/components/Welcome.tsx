@@ -27,9 +27,12 @@ export default function Welcome({
           <br />
           Рад, что вы здесь.
         </p>
-        <button className="pill" onClick={onContinue}>
-          Продолжить <Arrow />
-        </button>
+        <div className="welcome-actions">
+          <button className="pill" onClick={onContinue}>
+            Войти на сайт <Arrow />
+          </button>
+          <button className="unknown-object" title="UNKNOWN OBJECT" aria-label="Неизвестный объект" onClick={onSecret}><span aria-hidden="true">?</span></button>
+        </div>
         <div className="welcome-sculpture" aria-hidden="true">
           <div className="orbit orbit-one" />
           <div className="orbit orbit-two" />

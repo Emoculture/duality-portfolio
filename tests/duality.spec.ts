@@ -31,7 +31,7 @@ test("welcome and full professional portfolio", async ({ page }) => {
     page.getByRole("heading", { name: /Всё начинается/ }),
   ).toBeVisible();
   await noOverflow(page);
-  await page.getByRole("button", { name: "Продолжить" }).click();
+  await page.getByRole("button", { name: "Войти на сайт" }).click();
   await expect(
     page.getByRole("heading", { name: /Создаю цифровое/ }),
   ).toBeVisible();
@@ -108,7 +108,7 @@ test("keyboard access, session exit and denied storage", async ({ page }) => {
     });
   });
   await page.goto("/");
-  await page.getByRole("button", { name: "Продолжить" }).focus();
+  await page.getByRole("button", { name: "Войти на сайт" }).focus();
   await page.keyboard.press("Enter");
   await expect(page.locator("#home")).toBeVisible();
   await page.getByRole("button", { name: /DUALITY/ }).click();
@@ -126,7 +126,7 @@ test("320px layout across every reality and archive section", async ({
   await page.setViewportSize({ width: 320, height: 740 });
   await page.goto("/");
   await noOverflow(page);
-  await page.getByRole("button", { name: "Продолжить" }).click();
+  await page.getByRole("button", { name: "Войти на сайт" }).click();
   await noOverflow(page);
   await page.getByRole("button", { name: /DUALITY/ }).click();
   await enterGame(page);

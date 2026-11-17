@@ -51,7 +51,7 @@ export default function App() {
     if (transition) return;
     setTransition(true);
     timer.current = setTimeout(() => {
-      if (state.unlocked && loadIncident().endings.length) startConnection();
+      if (state.unlocked) startConnection();
       setState((s) => ({
         ...s,
         discovered: true,
