@@ -124,7 +124,7 @@ test("chapter progress updates portrait live and reset restores the original", a
   await expect(portrait).toHaveAttribute("src", "/archive/user-000.png");
 });
 
-test("directory labels navigate and shell remains light in dark system mode", async ({
+test("directory labels navigate with the story palette in dark system mode", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 320, height: 740 });
@@ -165,11 +165,11 @@ test("directory labels navigate and shell remains light in dark system mode", as
   );
   await expect(page.locator(".ib-shell")).toHaveCSS(
     "background-color",
-    "rgb(243, 238, 223)",
+    "rgb(40, 46, 41)",
   );
   await expect(page.locator(".retro-layout")).toHaveCSS(
     "background-color",
-    "rgb(237, 233, 217)",
+    "rgb(16, 23, 17)",
   );
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
   const nav = page.getByRole("navigation", { name: "Разделы INCIDENT 000" });
@@ -204,7 +204,7 @@ test("directory labels navigate and shell remains light in dark system mode", as
   );
   await expect(page.locator(".ib-shell")).toHaveCSS(
     "background-color",
-    "rgb(243, 238, 223)",
+    "rgb(40, 46, 41)",
   );
   expect(
     await page.evaluate(
@@ -312,7 +312,7 @@ test("portrait is static with reduced motion and NORMAL stays unchanged", async 
   ).toHaveCount(0);
 });
 
-test("light shell preserves the intentionally dark PURGE scene", async ({
+test("story palette preserves the intentionally dark PURGE scene", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 320, height: 740 });
@@ -353,7 +353,7 @@ test("light shell preserves the intentionally dark PURGE scene", async ({
   );
   await expect(page.locator(".ib-shell")).toHaveCSS(
     "background-color",
-    "rgb(243, 238, 223)",
+    "rgb(40, 46, 41)",
   );
   await expect(page.locator(".purged-home")).toHaveCSS(
     "background-color",

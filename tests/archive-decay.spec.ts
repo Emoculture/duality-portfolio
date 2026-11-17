@@ -34,3 +34,31 @@ test("decay stages derive from story milestones and survive reload", async ({ pa
   await enterSavedArchive(page);
   await expect(board).toHaveAttribute("data-decay-stage", "4");
 });
+
+test("milestone anomaly is skippable, saved once and keeps exit available", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.addInitScript(() => {
+    if (!localStorage.getItem("decay-once-seeded")) {
+      localStorage.setItem("decay-once-seeded", "1");
+      localStorage.setItem("duality.v1", JSON.stringify({ unlocked: true }));
+      localStorage.setItem("duality.incident.v1", JSON.stringify({ version: 1, clues: [], memory: { events: ["recording:first"] } }));
+    }
+  });
+  await page.goto("/");
+  await enterSavedArchive(page);
+  await page.evaluate(() => {
+    const save = JSON.parse(localStorage.getItem("duality.incident.v1")!);
+    save.clues = ["thread"];
+    localStorage.setItem("duality.incident.v1", JSON.stringify(save));
+    window.dispatchEvent(new Event("duality:incident-progress"));
+  });
+  await expect(page.locator(".decay-transition")).toContainText("I REMEMBER YOU");
+  await expect(page.getByRole("button", { name: "Завершить сеанс", exact: true })).toBeEnabled();
+  await page.getByRole("button", { name: "Пропустить сбой" }).click();
+  await expect(page.locator(".decay-transition")).toHaveCount(0);
+  await page.reload();
+  await enterSavedArchive(page);
+  await expect(page.locator(".archive-board")).toHaveAttribute("data-decay-stage", "1");
+  await expect(page.locator(".decay-transition")).toHaveCount(0);
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem("duality.incident.v1")!).memory.events.filter((s: string) => s === "decay-shown:1").length)).toBe(1);
+});

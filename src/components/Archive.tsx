@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { portfolio, projectRepositories } from "../data";
 import { validEcho } from "../state";
 import { boards, threads, imageSource, type ArchivePage } from "../archiveData";
@@ -11,7 +11,9 @@ import ArchiveImage from "./ArchiveImage";
 import ArchiveObserver from "./ArchiveObserver";
 import SoundSetting from "./SoundSetting";
 import { currentDecayStage } from "../incident/ArchiveDecayEngine";
+import ArchiveAnomalyManager from "../incident/ArchiveAnomalyManager";
 import "../archive.css";
+import "../incident/ArchiveDecayTheme.css";
 const incidentDirectories: Record<IncidentView, string> = {
   journal: "journal", forum: "threads", recovery: "recovery", cctv: "cctv",
   system: "system", history: "history", audio: "audio", dialogue: "user_000", decision: "ending",
@@ -33,7 +35,7 @@ export default function Archive({
 }) {
   const [page, setPage] = useState<ArchivePage>("home");
   const portraitStage = useSyncExternalStore(subscribeAvatarStage, avatarStage, () => 1);
-  const decayStage = useSyncExternalStore(subscribeAvatarStage, currentDecayStage, () => 0);
+  const decayStage = useSyncExternalStore(subscribeAvatarStage, currentDecayStage, () => 0 as const);
   const [minimized, setMinimized] = useState(false);
   const [maximized, setMaximized] = useState(true);
   const [showSearch, setShowSearch] = useState(false);
@@ -44,6 +46,8 @@ export default function Archive({
   const [historyIndex, setHistoryIndex] = useState(0);
   const restoring = useRef(false);
   const [settings, setSettings] = useState(false);
+  const [exitWarning, setExitWarning] = useState(false);
+  const reportExitWarning = useCallback((value: boolean) => setExitWarning(value), []);
   const [incidentStart, setIncidentStart] = useState<IncidentView>("journal");
   const [projectFilter, setProjectFilter] = useState("all");
   const [answer, setAnswer] = useState("");
@@ -227,7 +231,7 @@ export default function Archive({
               >
                 <span>Настройки</span>
               </button>
-              <button onClick={onExit}>Завершить сеанс</button>
+              <button onClick={onExit} aria-label="Завершить сеанс">{exitWarning ? "НЕ УХОДИ" : "Завершить сеанс"}</button>
             </div>
             <div className="ie-address">
               <span>Адрес:</span>
@@ -952,6 +956,7 @@ export default function Archive({
             </p>
             <p>DUALITY ARCHIVE © 2004–???? · художественный архив</p>
             <ArchiveObserver stage={portraitStage} />
+            <ArchiveAnomalyManager stage={decayStage} reduced={reduced} onExitWarning={reportExitWarning} />
             <p className="ib-fine">
               Все персонажи, даты и архивные события вымышлены. Изображения —
               авторские иллюстрации.
