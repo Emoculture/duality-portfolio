@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { add, type IncidentSave } from "./state";
+import RecoveredCollection from "./RecoveredCollection";
 
 type Props = {
   view: "journal" | "forum" | "recovery" | "cctv";
@@ -46,7 +47,8 @@ export default function MemoryCase({ view, save, update }: Props) {
       {!unlocked && <p>Для восстановления No.1412 изучите заметку модератора в этом разделе.</p>}
     </article>
   );
-  if (view === "recovery") return (
+  if (view === "recovery") return (<>
+    <RecoveredCollection save={save} update={update} />
     <article className="incident-panel memory-case">
       <h3>RECOVERED FILES / переписка</h3>
       <p>LETTER_2007.TXT — {memory.recovered.includes("LETTER") ? "RECOVERED" : unlocked ? "CORRUPTED" : "LOCKED"}</p>
@@ -66,7 +68,7 @@ export default function MemoryCase({ view, save, update }: Props) {
         </form>
         <p role="status">{feedback}</p>
       </>}
-    </article>
+    </article></>
   );
   return (
     <section className="memory-case">

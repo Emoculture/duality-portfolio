@@ -1,5 +1,35 @@
 import { expect, test } from "@playwright/test";
 
+test("additional photo, log and transcript recover with clues and survive reload", async ({ page }) => {
+  await page.addInitScript(() => {
+    if (!localStorage.getItem("recovered-seeded")) {
+      localStorage.setItem("recovered-seeded", "yes");
+      localStorage.setItem("duality.v1", JSON.stringify({ mode: "archive", unlocked: true }));
+      localStorage.setItem("duality.incident.v1", JSON.stringify({ version: 1, clues: ["thread", "moderator", "image"], memory: { recovered: ["LETTER"], evidence: ["camera000"] } }));
+    }
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
+  await page.getByRole("navigation", { name: "Разделы INCIDENT 000" }).getByRole("button", { name: "/recovery/" }).click();
+  const files = page.getByRole("region", { name: "Дополнительные восстановленные файлы" });
+  await expect(files).toContainText("VOICE_2007.TXT — LOCKED");
+  await files.getByLabel("Метка фотографии").fill("00:02");
+  await files.getByRole("button", { name: "Восстановить фотографию" }).click();
+  await expect(files.getByRole("status")).toContainText("не совпадает");
+  await files.getByLabel("Метка фотографии").fill("00:01");
+  await files.getByRole("button", { name: "Восстановить фотографию" }).click();
+  await files.getByLabel("Порядок событий").fill("2004-2007");
+  await files.getByRole("button", { name: "Восстановить журнал" }).click();
+  await files.getByLabel("Слово расшифровки").fill("TRACE");
+  await files.getByRole("button", { name: "Восстановить расшифровку" }).click();
+  await expect(files).toContainText("VOICE_2007.TXT — RECOVERED");
+  await page.reload();
+  await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
+  await expect(page.locator(".incident-journal")).toContainText("PHOTO_000.JPG");
+  await expect(page.locator(".incident-journal")).toContainText("SERVER_2007.LOG");
+  await expect(page.locator(".incident-journal")).toContainText("VOICE_2007.TXT");
+});
+
 test("legacy incident save migrates, remembers returns, and resets only on confirmation", async ({ page }) => {
   await page.addInitScript(() => {
     if (!localStorage.getItem("memory-test-seeded")) {
