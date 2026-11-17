@@ -1,4 +1,4 @@
-export type Ending = "PURGE" | "RELEASE" | "REPLACEMENT";
+export type Ending = "PURGE" | "RELEASE" | "REPLACEMENT" | "MEMORY_PROTOCOL";
 export type ArchiveMemory = {
   version: 1;
   visits: number;
@@ -70,10 +70,10 @@ export function loadIncident(): IncidentSave {
           clues: strings(s.clues),
           choices: strings(s.choices),
           endings: strings(s.endings).filter((e): e is Ending =>
-            ["PURGE", "RELEASE", "REPLACEMENT"].includes(e),
+            ["PURGE", "RELEASE", "REPLACEMENT", "MEMORY_PROTOCOL"].includes(e),
           ),
           systemUnlocked: s.systemUnlocked === true,
-          lastEnding: ["PURGE", "RELEASE", "REPLACEMENT"].includes(s.lastEnding)
+          lastEnding: ["PURGE", "RELEASE", "REPLACEMENT", "MEMORY_PROTOCOL"].includes(s.lastEnding)
             ? s.lastEnding
             : null,
           legacyInvestigation: Number.isInteger(s.legacyInvestigation)

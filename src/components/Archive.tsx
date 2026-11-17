@@ -153,6 +153,7 @@ export default function Archive({
   return (
     <div
       className={`archive-board ${incidentEnd === "REPLACEMENT" ? "incident-replacement" : incidentEnd === "PURGE" ? "incident-purged" : ""}`}
+      data-incident-stage={portraitStage}
     >
       <a className="skip-link" href="#archive-main">
         К содержимому

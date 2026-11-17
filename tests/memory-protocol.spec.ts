@@ -114,3 +114,34 @@ test("NULL choices, timer and ADMIN_1999 persist", async ({ page }) => {
   await expect(messenger).toContainText("Сначала докажи");
   await expect(messenger).toContainText("Переписка сохранена");
 });
+
+test("secret ending requires the case evidence and survives a new run", async ({ page }) => {
+  await page.addInitScript(() => {
+    if (!localStorage.getItem("ending-seeded")) {
+      localStorage.setItem("ending-seeded", "yes");
+      localStorage.setItem("duality.v1", JSON.stringify({ mode: "archive", unlocked: true, discovered: true }));
+      localStorage.setItem("duality.incident.v1", JSON.stringify({
+        version: 1, clues: ["thread", "moderator", "image", "camera", "system", "dialogue", "finalkey"],
+        memory: { recovered: ["LETTER"], events: ["midnight", "null-complete"], evidence: ["forum", "camera000", "midnight", "null", "admin"], adminUnlocked: true },
+      }));
+    }
+  });
+  await page.goto("/");
+  await expect(page.locator(".archive-board")).toHaveAttribute("data-incident-stage", "7");
+  await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
+  const nav = page.getByRole("navigation", { name: "Разделы INCIDENT 000" });
+  await nav.getByRole("button", { name: "/ending/" }).click();
+  await expect(page.getByRole("button", { name: "Запустить MEMORY PROTOCOL" })).toHaveCount(0);
+  await nav.getByRole("button", { name: "/journal/" }).click();
+  await page.getByRole("button", { name: "Сохранить противоречие" }).click();
+  await nav.getByRole("button", { name: "/ending/" }).click();
+  await page.getByRole("button", { name: "Запустить MEMORY PROTOCOL" }).click();
+  await expect(page.locator(".incident-ending")).toContainText("MEMORY PROTOCOL");
+  await page.reload();
+  await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
+  await expect(page.locator(".incident-journal")).toContainText("MEMORY_PROTOCOL");
+  await page.getByRole("button", { name: "Сбросить игровой прогресс" }).click();
+  await page.getByRole("button", { name: "Да, начать заново" }).click();
+  await expect(page.locator(".incident-journal")).toContainText("MEMORY_PROTOCOL");
+  await expect(page.locator(".archive-board")).toHaveAttribute("data-incident-stage", "1");
+});

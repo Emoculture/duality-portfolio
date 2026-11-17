@@ -58,6 +58,24 @@
 .memory-camera figcaption { padding: 4px; font: 12px "Courier New", monospace; }
 .memory-camera-1::after { content: ""; position: absolute; top: 48%; left: 57%; width: 16px; height: 60px; background: #151915; box-shadow: 0 0 5px #202820; border-radius: 45% 45% 0 0; }
 .memory-camera-2 img { opacity: .4; filter: grayscale(1) contrast(1.4); }
+/* Static, chapter-dependent traces leave the light shell and controls legible. */
+.archive-board[data-incident-stage="2"] .incident-journal::after,
+.archive-board[data-incident-stage="3"] .incident-journal::after,
+.archive-board[data-incident-stage="4"] .incident-journal::after,
+.archive-board[data-incident-stage="5"] .incident-journal::after,
+.archive-board[data-incident-stage="6"] .incident-journal::after,
+.archive-board[data-incident-stage="7"] .incident-journal::after {
+  content: "[copy error: 2004.11.0?]";
+  display: block;
+  color: #702525;
+  font: 11px "Courier New", monospace;
+}
+.archive-board[data-incident-stage="4"] .memory-case,
+.archive-board[data-incident-stage="5"] .memory-case,
+.archive-board[data-incident-stage="6"] .memory-case,
+.archive-board[data-incident-stage="7"] .memory-case { border-left: 2px dashed #805c57; padding-left: 8px; }
+.archive-board[data-incident-stage="6"] .memory-messenger,
+.archive-board[data-incident-stage="7"] .memory-messenger { border: 1px dashed #805c57; padding: 6px; }
 .incident-panel pre {
   white-space: pre-wrap;
   overflow-wrap: anywhere;

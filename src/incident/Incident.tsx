@@ -174,6 +174,9 @@ export default function Incident({
     changeView("journal");
   }
   const current = chapter(save);
+  const memoryEndingReady = save.memory.recovered.includes("LETTER") &&
+    ["forum", "camera000", "midnight", "null", "admin", "contradiction"].every((item) => save.memory.evidence.includes(item)) &&
+    save.memory.events.includes("null-complete") && save.memory.adminUnlocked;
   const messages = save.systemUnlocked
     ? "Я помню этот рабочий стол. Но не помню, кто вернулся."
     : save.clues.includes("log")
@@ -801,6 +804,7 @@ export default function Incident({
                 <button onClick={() => finish("REPLACEMENT")}>
                   Стать администратором
                 </button>
+                {memoryEndingReady && <button onClick={() => finish("MEMORY_PROTOCOL")}>Запустить MEMORY PROTOCOL</button>}
               </div>
             </>
           )}
@@ -837,7 +841,7 @@ export default function Incident({
                     сохранённой памятью.
                   </p>
                 </>
-              ) : (
+              ) : save.lastEnding === "REPLACEMENT" ? (
                 <>
                   <strong>WELCOME BACK, ADMINISTRATOR</strong>
                   <p>
@@ -849,6 +853,12 @@ export default function Incident({
                     остаётся ответ, написанный до того, как вы приняли это
                     решение.
                   </p>
+                </>
+              ) : (
+                <>
+                  <strong>MEMORY PROTOCOL</strong>
+                  <p>Записи сходятся: копия существовала до удаления, а сигнал появился до команды восстановления. Архив мог сохранять не человека целиком, а способ отвечать вместо него.</p>
+                  <p>NULL: «Если кто-то продолжает разговор, значит ли это, что кто-то вернулся?» Ответ остаётся в журнале, но его источник по-прежнему неизвестен.</p>
                 </>
               )}
               <p>Открытые финалы: {save.endings.join(", ")}</p>
