@@ -5,7 +5,7 @@ import { boards, threads, imageSource, type ArchivePage } from "../archiveData";
 import ArchiveThreads from "./ArchiveThreads";
 import Investigation from "./Investigation";
 import Incident, { type View as IncidentView } from "../incident/Incident";
-import { avatarStage, loadIncident, remember, subscribeAvatarStage } from "../incident/state";
+import { avatarStage, loadIncident, recordArchiveVisit, remember, subscribeAvatarStage } from "../incident/state";
 import ArchivePortrait from "./ArchivePortrait";
 import ArchiveImage from "./ArchiveImage";
 import "../archive.css";
@@ -50,6 +50,13 @@ export default function Archive({
   const [attachment, setAttachment] = useState<string | null>(null);
   const heading = useRef<HTMLElement>(null);
   const lastRoute = useRef({ page, thread });
+  const visitRecorded = useRef(false);
+  useEffect(() => {
+    if (!visitRecorded.current) {
+      visitRecorded.current = true;
+      recordArchiveVisit();
+    }
+  }, []);
   useEffect(() => {
     if (lastRoute.current.page === page && lastRoute.current.thread === thread)
       return;

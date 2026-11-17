@@ -1,4 +1,10 @@
 export type Ending = "PURGE" | "RELEASE" | "REPLACEMENT";
+export type ArchiveMemory = {
+  version: 1;
+  visits: number;
+  highestChapter: number;
+  events: string[];
+};
 export type IncidentSave = {
   version: 1;
   visited: string[];
@@ -11,6 +17,7 @@ export type IncidentSave = {
   lastEnding: Ending | null;
   legacyInvestigation: number;
   legacyPuzzle: boolean;
+  memory: ArchiveMemory;
 };
 const KEY = "duality.incident.v1";
 let volatileSave: IncidentSave | null = null;
@@ -22,7 +29,9 @@ const copy = (s: IncidentSave): IncidentSave => ({
   clues: [...s.clues],
   choices: [...s.choices],
   endings: [...s.endings],
+  memory: { ...s.memory, events: [...s.memory.events] },
 });
+const emptyMemory = (): ArchiveMemory => ({ version: 1, visits: 0, highestChapter: 1, events: [] });
 const empty = (): IncidentSave => ({
   version: 1,
   visited: [],
@@ -35,6 +44,7 @@ const empty = (): IncidentSave => ({
   lastEnding: null,
   legacyInvestigation: 0,
   legacyPuzzle: false,
+  memory: emptyMemory(),
 });
 const strings = (v: unknown): string[] =>
   Array.isArray(v)
@@ -64,6 +74,12 @@ export function loadIncident(): IncidentSave {
             ? Math.max(0, Math.min(6, s.legacyInvestigation))
             : 0,
           legacyPuzzle: s.legacyPuzzle === true,
+          memory: {
+            version: 1,
+            visits: Number.isSafeInteger(s.memory?.visits) ? Math.max(0, Math.min(100000, s.memory.visits)) : 0,
+            highestChapter: Number.isInteger(s.memory?.highestChapter) ? Math.max(1, Math.min(7, s.memory.highestChapter)) : 1,
+            events: strings(s.memory?.events),
+          },
         };
     }
     if (volatileSave) return copy(volatileSave);
@@ -83,6 +99,7 @@ export function loadIncident(): IncidentSave {
   }
 }
 export function saveIncident(s: IncidentSave) {
+  s = { ...s, memory: { ...s.memory, highestChapter: Math.max(s.memory.highestChapter, Math.min(7, chapter(s) + 1)) } };
   volatileSave = copy(s);
   // saveIncident is called from React state updaters; notify after rendering.
   if (typeof window !== "undefined") {
@@ -95,6 +112,18 @@ export function saveIncident(s: IncidentSave) {
   } catch {
     /* session remains playable */
   }
+  return copy(s);
+}
+/** One entry per actual ARCHIVE mount, independent of navigation within it. */
+export function recordArchiveVisit() {
+  const s = loadIncident();
+  saveIncident({ ...s, memory: { ...s.memory, visits: Math.min(100000, s.memory.visits + 1) } });
+}
+/** Explicit destructive action; does not touch access settings or other saves. */
+export function clearIncidentMemory() {
+  const fresh = empty();
+  saveIncident(fresh);
+  return fresh;
 }
 export function remember(key: "visited" | "threads" | "files", value: string) {
   const s = loadIncident();

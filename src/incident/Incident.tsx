@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   add,
   chapter,
+  clearIncidentMemory,
   loadIncident,
   saveIncident,
   steps,
@@ -98,6 +99,7 @@ export default function Incident({
   );
   const [finalAnswer, setFinalAnswer] = useState("");
   const [reset, setReset] = useState(false);
+  const [erase, setErase] = useState(false);
   useEffect(() => {
     if (initialView === "journal")
       update((s) => ({ ...s, visited: add(s.visited, "journal") }));
@@ -117,9 +119,9 @@ export default function Incident({
         visited: [...new Set([...s.visited, ...latest.visited])],
         threads: [...new Set([...s.threads, ...latest.threads])],
         files: [...new Set([...s.files, ...latest.files])],
+        memory: latest.memory,
       });
-      saveIncident(n);
-      return n;
+      return saveIncident(n);
     });
   }
   function clue(id: string) {
@@ -132,8 +134,9 @@ export default function Incident({
     clue(id);
     setFeedback("Запись восстановлена и добавлена в журнал.");
   }
-  function resetProgress() {
-    update((s) => ({
+  function resetProgress(eraseAll = false) {
+    if (eraseAll) setSave(clearIncidentMemory());
+    else update((s) => ({
       ...s,
       visited: [],
       threads: [],
@@ -144,6 +147,7 @@ export default function Incident({
       lastEnding: null,
     }));
     setReset(false);
+    setErase(false);
     setPieces([2, 1, 3, 4, 6, 5]);
     setSelected(null);
     setLog1("");
@@ -249,6 +253,10 @@ export default function Incident({
             <p>
               Глава: {Math.min(current + 1, 7)}/7 · улик: {save.clues.length}
             </p>
+            <p>
+              Входов в архив: {save.memory.visits} · максимальная глава: {save.memory.highestChapter}/7
+              {save.memory.visits > 1 && <> · Ты снова здесь.</>}
+            </p>
             {steps.map((s, i) => (
               <p key={s}>
                 [{save.clues.includes(s) ? "X" : " "}] {chapterNames[i]} —{" "}
@@ -279,8 +287,16 @@ export default function Incident({
                   Сбросить расследование? Открытые концовки и прежние сохранения
                   останутся.
                 </p>
-                <button onClick={resetProgress}>Да, начать заново</button>{" "}
+                <button onClick={() => resetProgress()}>Да, начать заново</button>{" "}
                 <button onClick={() => setReset(false)}>Отмена</button>
+              </div>
+            )}
+            <button onClick={() => setErase(true)}>Удалить все игровые воспоминания</button>
+            {erase && (
+              <div role="alert">
+                <p>Удалить прогресс INCIDENT, посещения, выборы и открытые концовки на этом устройстве? Доступ к архиву, настройки и другие сохранения останутся.</p>
+                <button onClick={() => resetProgress(true)}>Да, удалить воспоминания</button>{" "}
+                <button onClick={() => setErase(false)}>Отмена</button>
               </div>
             )}
           </div>
@@ -826,7 +842,7 @@ export default function Incident({
               {reset && (
                 <div role="alert">
                   <p>Начать заново? Открытые концовки останутся.</p>
-                  <button onClick={resetProgress}>
+                  <button onClick={() => resetProgress()}>
                     Да, начать заново
                   </button>{" "}
                   <button onClick={() => setReset(false)}>Отмена</button>
