@@ -78,3 +78,28 @@ test("late story camera reveals a fictional empty chair without removing existin
   await expect(page.getByRole("button", { name: "Сохранить кадр CAMERA_000" })).toBeVisible();
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem("duality.incident.v1")!).memory.events)).toContain("decay-chair-seen");
 });
+
+test("final anomaly counts users down and keeps archive links readable", async ({ page }) => {
+  await page.clock.install();
+  await page.addInitScript(() => {
+    localStorage.setItem("duality.v1", JSON.stringify({ unlocked: true }));
+    localStorage.setItem("duality.incident.v1", JSON.stringify({ version: 1, clues: [], memory: { events: ["recording:first"] } }));
+  });
+  await page.goto("/");
+  await enterSavedArchive(page);
+  await page.evaluate(() => {
+    const save = JSON.parse(localStorage.getItem("duality.incident.v1")!);
+    save.clues = ["thread", "finalkey"];
+    localStorage.setItem("duality.incident.v1", JSON.stringify(save));
+    window.dispatchEvent(new Event("duality:incident-progress"));
+  });
+  const transition = page.locator(".decay-transition");
+  await expect(transition).toContainText("USER COUNT: 2");
+  await page.clock.fastForward(1200);
+  await expect(transition).toContainText("USER COUNT: 1");
+  await page.clock.fastForward(1200);
+  await expect(transition).toContainText("USER COUNT: 0");
+  await page.getByRole("button", { name: "Пропустить сбой" }).click();
+  await expect(page.locator(".retro-main-post header button").first()).toHaveCSS("color", "rgb(240, 183, 173)");
+  await expect(page.locator(".retro-status button").first()).toHaveCSS("color", "rgb(240, 183, 173)");
+});

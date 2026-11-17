@@ -28,6 +28,11 @@
 .archive-board[data-decay-stage="4"] .retro-layout { background-color: #101711; }
 .archive-board[data-decay-stage="4"] .retro-left, .archive-board[data-decay-stage="4"] .retro-right { background: #1e2920; }
 .archive-board[data-decay-stage="3"] .ib-box > h2, .archive-board[data-decay-stage="4"] .ib-box > h2 { background: #514640; color: #f0c2bb; }
+.archive-board[data-decay-stage="3"] .retro-main-post header button, .archive-board[data-decay-stage="4"] .retro-main-post header button,
+.archive-board[data-decay-stage="3"] .retro-replies header button, .archive-board[data-decay-stage="4"] .retro-replies header button,
+.archive-board[data-decay-stage="3"] .retro-replies p button, .archive-board[data-decay-stage="4"] .retro-replies p button,
+.archive-board[data-decay-stage="3"] .retro-status button, .archive-board[data-decay-stage="4"] .retro-status button,
+.archive-board[data-decay-stage="3"] .ib-quote, .archive-board[data-decay-stage="4"] .ib-quote { color: #f0b7ad; }
 .archive-board[data-decay-stage="3"] .archive-observer, .archive-board[data-decay-stage="4"] .archive-observer,
 .archive-board[data-decay-stage="3"] .ib-stats-note, .archive-board[data-decay-stage="4"] .ib-stats-note { color: #d4c6b5; }
 .archive-board[data-decay-stage="3"] .recovered-collection h4, .archive-board[data-decay-stage="4"] .recovered-collection h4 { color: #f0b8b0; }
