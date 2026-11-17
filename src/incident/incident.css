@@ -77,6 +77,18 @@
 .archive-board[data-incident-stage="7"] .memory-case { border-left: 2px dashed #805c57; padding-left: 8px; }
 .archive-board[data-incident-stage="6"] .memory-messenger,
 .archive-board[data-incident-stage="7"] .memory-messenger { border: 1px dashed #805c57; padding: 6px; }
+/* Deterministic traces intensify with the same chapter state as the portrait. */
+.archive-board[data-incident-stage="3"] .incident h2,
+.archive-board[data-incident-stage="4"] .incident h2 { text-shadow: 1px 0 #bbaaa0; }
+.archive-board[data-incident-stage="5"] .incident h2,
+.archive-board[data-incident-stage="6"] .incident h2,
+.archive-board[data-incident-stage="7"] .incident h2 { text-shadow: 1px 0 #aa8d87, -1px 0 #d4c5af; }
+.archive-board[data-incident-stage="5"] .memory-camera,
+.archive-board[data-incident-stage="6"] .memory-camera,
+.archive-board[data-incident-stage="7"] .memory-camera { box-shadow: 2px 2px #a9a499; }
+.archive-board[data-incident-stage="6"] .memory-messenger::after,
+.archive-board[data-incident-stage="7"] .memory-messenger::after { content: "▚ ▖ ▚ / signal fragment"; color: #71504b; font: 10px "Courier New", monospace; }
+.archive-board[data-incident-stage="7"] .incident-panel { border-right: 2px dashed #aea095; }
 .incident-panel pre {
   white-space: pre-wrap;
   overflow-wrap: anywhere;

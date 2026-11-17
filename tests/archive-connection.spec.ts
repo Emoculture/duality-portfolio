@@ -59,3 +59,17 @@ test("reduced motion uses a short static connection", async ({ page }) => {
   await page.clock.fastForward(1500);
   await expect(page.locator(".archive-board")).toHaveCSS("background-color", "rgb(234, 230, 216)");
 });
+
+test("archive traces follow chapter progress without changing the light shell", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("duality.v1", JSON.stringify({ mode: "archive", unlocked: true }));
+    localStorage.setItem("duality.incident.v1", JSON.stringify({ version: 1, clues: ["thread", "moderator", "image", "camera", "system", "dialogue"] }));
+  });
+  await page.emulateMedia({ reducedMotion: "reduce", colorScheme: "dark" });
+  await page.goto("/");
+  await expect(page.locator(".archive-board")).toHaveAttribute("data-incident-stage", "7");
+  await expect(page.locator(".archive-board")).toHaveCSS("background-color", "rgb(234, 230, 216)");
+  await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
+  await expect(page.locator(".incident h2").first()).not.toHaveCSS("text-shadow", "none");
+  await expect(page.getByRole("button", { name: "/journal/" })).toBeEnabled();
+});
