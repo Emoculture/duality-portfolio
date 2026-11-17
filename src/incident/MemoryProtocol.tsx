@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { add, type IncidentSave } from "./state";
+import { decayStageFor } from "./ArchiveDecayEngine";
 
 type Props = { view: "journal" | "dialogue"; save: IncidentSave; update: (fn: (s: IncidentSave) => IncidentSave) => void };
 
@@ -31,6 +32,7 @@ export default function MemoryProtocol({ view, save, update }: Props) {
   if (view === "dialogue") return (
     <section className="memory-messenger" aria-label="Переписка с NULL">
       <h3>NULL — Messenger 2004</h3>
+      {decayStageFor(save) >= 2 && <p className="decay-null-note">[соединение: два ответа / источник неизвестен]</p>}
       {!memory.recovered.includes("LETTER") ? <p>Соединение недоступно. Восстановите переписку LETTER_2007.TXT.</p> : <>
         <p>NULL: «Вы нашли след. Поможете разобраться, кто отвечал из копии?»</p>
         {!reply ? <div>

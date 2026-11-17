@@ -61,3 +61,25 @@ test("phone uses a single readable archive and fits the viewport", async ({ page
   await page.getByRole("button", { name: "/projects/", exact: true }).click();
   await expect(page.getByRole("heading", { name: /Каталог работ/ })).toBeVisible();
 });
+
+test("late-stage YOU file is accessible on desktop and phone and remembered", async ({ page }, info) => {
+  await page.addInitScript(() => {
+    if (!localStorage.getItem("you-test-seeded")) {
+      localStorage.setItem("you-test-seeded", "1");
+      localStorage.setItem("duality.v1", JSON.stringify({ unlocked: true, reduced: true }));
+      localStorage.setItem("duality.incident.v1", JSON.stringify({ version: 1, clues: ["thread", "moderator", "image"], memory: { events: ["recording:first"], adminUnlocked: true, evidence: ["contradiction"] } }));
+    }
+  });
+  await page.goto("/");
+  await enterSavedArchive(page);
+  await expect(page.locator(".archive-board")).toHaveAttribute("data-decay-stage", "3");
+  if (info.project.name === "desktop") {
+    await page.getByRole("navigation", { name: "Рабочий стол ARCHIVE_OS" }).getByRole("button", { name: "Проводник" }).click();
+    await page.getByRole("region", { name: "Окно проводника" }).getByRole("button", { name: "▧ YOU" }).click();
+    await expect(page.getByRole("region", { name: "Окно YOU" })).toContainText("вымышленный файл");
+  } else {
+    await page.locator(".archive-os-mobile-you summary").click();
+    await expect(page.locator(".archive-os-mobile-you")).toContainText("Содержимое вымышлено");
+  }
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem("duality.incident.v1")!).memory.events)).toContain("decay-found:you");
+});

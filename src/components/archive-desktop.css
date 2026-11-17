@@ -17,15 +17,19 @@
 .archive-os-clock { padding: 5px; border: 2px inset #eee; white-space: nowrap; font: 11px "Courier New", monospace; }
 .archive-os-clock[aria-label] { margin-left: auto; }
 .archive-os-start { position: absolute; bottom: 100%; left: 0; display: grid; background: #c9ccc1; border: 2px outset #eee; }
+.archive-os-mobile-you { display: none; }
 body:has(.pixel-cutscene) .archive-os-taskbar { visibility: hidden; }
 .archive-os[data-os-decay="2"] { background: repeating-linear-gradient(45deg, #6a7968 0 2px, #64725f 2px 4px); }
 .archive-os[data-os-decay="3"], .archive-os[data-os-decay="4"] { background: repeating-linear-gradient(45deg, #29352c 0 2px, #222e25 2px 4px); }
 .archive-os[data-os-decay="4"] { background: repeating-linear-gradient(45deg, #0d1610 0 2px, #152117 2px 4px); }
 .archive-os[data-os-decay="3"] .archive-os-icons button, .archive-os[data-os-decay="4"] .archive-os-icons button { color: #d7e5cf; }
 .archive-os[data-os-decay="3"] .archive-os-taskbar, .archive-os[data-os-decay="4"] .archive-os-taskbar { background: #485147; }
+.archive-os[data-os-decay="3"] .archive-os-window .archive-os-body, .archive-os[data-os-decay="4"] .archive-os-window .archive-os-body { background: #29342c; color: #e2e8d9; }
+.archive-os[data-os-decay="4"] .archive-os-window .archive-os-title { background: #512e2d; }
 @media (max-width: 760px) {
   .archive-os { padding: 38px 0 0; background: transparent !important; }
   .archive-os-icons, .archive-os-taskbar, .archive-os-browser > .archive-os-title, .archive-os-window { display: none; }
   .archive-os-browser { left: 0 !important; top: 0 !important; border: 0; }
   .archive-os-controls { top: 3px; right: 4px; }
+  .archive-os-mobile-you { display: block; padding: 10px; background: #29342c; color: #e2e8d9; }
 }

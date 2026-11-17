@@ -62,3 +62,19 @@ test("milestone anomaly is skippable, saved once and keeps exit available", asyn
   await expect(page.locator(".decay-transition")).toHaveCount(0);
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem("duality.incident.v1")!).memory.events.filter((s: string) => s === "decay-shown:1").length)).toBe(1);
 });
+
+test("late story camera reveals a fictional empty chair without removing existing clues", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("duality.v1", JSON.stringify({ unlocked: true, reduced: true }));
+    localStorage.setItem("duality.incident.v1", JSON.stringify({ version: 1, clues: ["thread", "moderator", "image"], memory: { events: ["recording:first"], adminUnlocked: true, evidence: ["contradiction"] } }));
+  });
+  await page.goto("/");
+  await enterSavedArchive(page);
+  await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
+  await page.getByRole("navigation", { name: "Разделы INCIDENT 000" }).getByRole("button", { name: "/cctv/" }).click();
+  await page.getByRole("button", { name: "Открыть повреждённый кадр кресла" }).click();
+  await expect(page.getByRole("img", { name: "Вымышленный архивный кадр пустого кресла у монитора" })).toBeVisible();
+  await page.getByLabel("Таймкод").selectOption("00:01");
+  await expect(page.getByRole("button", { name: "Сохранить кадр CAMERA_000" })).toBeVisible();
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem("duality.incident.v1")!).memory.events)).toContain("decay-chair-seen");
+});

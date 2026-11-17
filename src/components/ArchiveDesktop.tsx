@@ -1,18 +1,18 @@
 import { useCallback, useEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
-import { loadIncident } from "../incident/state";
+import { add, loadIncident, saveIncident } from "../incident/state";
 import type { ArchivePage } from "../archiveData";
 import type { DecayStage } from "../incident/ArchiveDecayEngine";
 import "./archive-desktop.css";
 
-type WindowName = "browser" | "navigator" | "memory";
-const titles: Record<WindowName, string> = { browser: "ARCHIVE.EXE", navigator: "Проводник", memory: "MEMORY.LOG" };
+type WindowName = "browser" | "navigator" | "memory" | "you";
+const titles: Record<WindowName, string> = { browser: "ARCHIVE.EXE", navigator: "Проводник", memory: "MEMORY.LOG", you: "YOU" };
 const links: [string, ArchivePage][] = [["Главная", "home"], ["Проекты", "projects"], ["Треды", "threads"], ["Об авторе", "about"], ["Файлы", "files"], ["Расследование", "incident"]];
 
 export default function ArchiveDesktop({ children, stage, navigate }: { children: ReactNode; stage: DecayStage; navigate: (page: ArchivePage) => void }) {
   const desktop = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState<WindowName[]>(["browser"]);
   const [order, setOrder] = useState<WindowName[]>(["browser"]);
-  const [positions, setPositions] = useState<Record<WindowName, { x: number; y: number }>>({ browser: { x: 0, y: 0 }, navigator: { x: 110, y: 80 }, memory: { x: 180, y: 140 } });
+  const [positions, setPositions] = useState<Record<WindowName, { x: number; y: number }>>({ browser: { x: 0, y: 0 }, navigator: { x: 110, y: 80 }, memory: { x: 180, y: 140 }, you: { x: 240, y: 170 } });
   const dragging = useRef<{ name: WindowName; startX: number; startY: number; x: number; y: number } | null>(null);
   const [full, setFull] = useState(false);
   const [error, setError] = useState("");
@@ -42,6 +42,7 @@ export default function ArchiveDesktop({ children, stage, navigate }: { children
       browser: { x: Math.max(-60, Math.min(0, p.browser.x)), y: Math.max(0, Math.min(100, p.browser.y)) },
       navigator: { x: Math.max(0, Math.min(window.innerWidth - Math.min(360, window.innerWidth - 20), p.navigator.x)), y: Math.max(0, Math.min(window.innerHeight - 90, p.navigator.y)) },
       memory: { x: Math.max(0, Math.min(window.innerWidth - Math.min(360, window.innerWidth - 20), p.memory.x)), y: Math.max(0, Math.min(window.innerHeight - 90, p.memory.y)) },
+      you: { x: Math.max(0, Math.min(window.innerWidth - Math.min(360, window.innerWidth - 20), p.you.x)), y: Math.max(0, Math.min(window.innerHeight - 90, p.you.y)) },
     }));
     window.addEventListener("resize", clamp);
     return () => window.removeEventListener("resize", clamp);
@@ -75,6 +76,14 @@ export default function ArchiveDesktop({ children, stage, navigate }: { children
     </header>;
   }
   function openPage(page: ArchivePage) { navigate(page); focus("browser"); }
+  function rememberYou() {
+    const save = loadIncident();
+    if (!save.memory.events.includes("decay-found:you")) saveIncident({ ...save, memory: { ...save.memory, events: add(save.memory.events, "decay-found:you") } });
+  }
+  function openYou() {
+    rememberYou();
+    focus("you");
+  }
   const progress = loadIncident();
   return <div className="archive-os" data-os-decay={stage} ref={desktop}>
     <div className="archive-os-controls"><button onClick={fullscreen}>{full ? "⛶ EXIT FULLSCREEN" : "⛶ FULLSCREEN"}</button>{error && <span role="status">{error}</span>}</div>
@@ -87,11 +96,15 @@ export default function ArchiveDesktop({ children, stage, navigate }: { children
       {title("browser")}{children}
     </section>
     {open.includes("navigator") && <section className="archive-os-window" aria-label="Окно проводника" onPointerDown={() => focus("navigator")} style={{ left: positions.navigator.x, top: positions.navigator.y, zIndex: 10 + order.indexOf("navigator") }}>
-      {title("navigator")}<div className="archive-os-body"><p>ARCHIVE:\\</p>{links.map(([label, page]) => <button key={page} onClick={() => openPage(page)}>▣ {label}</button>)}{stage >= 3 && <p>▧ YOU / [запись не восстановлена]</p>}</div>
+      {title("navigator")}<div className="archive-os-body"><p>ARCHIVE:\\</p>{links.map(([label, page]) => <button key={page} onClick={() => openPage(page)}>▣ {label}</button>)}{stage >= 3 && <button onClick={openYou}>▧ YOU</button>}</div>
     </section>}
     {open.includes("memory") && <section className="archive-os-window" aria-label="Окно журнала памяти" onPointerDown={() => focus("memory")} style={{ left: positions.memory.x, top: positions.memory.y, zIndex: 10 + order.indexOf("memory") }}>
       {title("memory")}<div className="archive-os-body"><p>MEMORY.LOG / локальная копия</p><p>Файлы: {progress.files.length} · улики: {progress.clues.length}</p><p>Для исследования откройте соответствующий раздел архива.</p><button onClick={() => openPage("incident")}>Открыть расследование</button></div>
     </section>}
+    {open.includes("you") && <section className="archive-os-window" aria-label="Окно YOU" onPointerDown={() => focus("you")} style={{ left: positions.you.x, top: positions.you.y, zIndex: 10 + order.indexOf("you") }}>
+      {title("you")}<div className="archive-os-body"><p>YOU / неопознанная архивная запись</p><p>Источник неизвестен. Это вымышленный файл; сведения о посетителе не используются.</p><p>«Копия ответила раньше, чем её открыли».</p></div>
+    </section>}
+    {stage >= 3 && <details className="archive-os-mobile-you" onToggle={(event) => { if (event.currentTarget.open) rememberYou(); }}><summary>▧ YOU / неопознанная запись</summary><p>«Копия ответила раньше, чем её открыли». Содержимое вымышлено и не использует сведения о посетителе.</p></details>}
     <footer className="archive-os-taskbar"><button onClick={() => setStart(!start)} aria-expanded={start}>▦ ARCHIVE_OS</button>{open.map((name) => <button key={name} onClick={() => focus(name)} aria-pressed={order.at(-1) === name}>{titles[name]}</button>)}<span className="archive-os-clock" aria-label="Индикатор звука">{sound ? "♪ ON" : "♪ OFF"}</span><span className="archive-os-clock">SYS · {stage === 4 ? `00:${String(59 - clock).padStart(2, "0")}` : `00:${String(clock).padStart(2, "0")}`}</span>{start && <div className="archive-os-start"><button onClick={() => focus("browser")}>ARCHIVE.EXE</button><button onClick={() => focus("navigator")}>Проводник</button><button onClick={() => focus("memory")}>MEMORY.LOG</button></div>}</footer>
   </div>;
 }

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { add, type IncidentSave } from "./state";
 import RecoveredCollection from "./RecoveredCollection";
+import { decayStageFor } from "./ArchiveDecayEngine";
 
 type Props = {
   view: "journal" | "forum" | "recovery" | "cctv";
@@ -89,6 +90,10 @@ export default function MemoryCase({ view, save, update }: Props) {
         {frame === "00:02" && memory.events.includes("midnight") && <p>Восстановленная запись противоречит журналу: дверь открыта до команды администратора.</p>}
         {frame === "00:01" && <><p>На кадре есть тень, но журнал камеры не содержит записи об открытии двери.</p><button onClick={() => collect("camera000")}>Сохранить кадр CAMERA_000</button></>}
         {memory.evidence.includes("camera000") && <p>Кадр сохранён в деле.</p>}
+        {decayStageFor(save) >= 3 && <div>
+          <button onClick={() => update((s) => ({ ...s, memory: { ...s.memory, events: add(s.memory.events, "decay-chair-seen") } }))}>Открыть повреждённый кадр кресла</button>
+          {memory.events.includes("decay-chair-seen") && <figure className="decay-chair"><svg viewBox="0 0 240 140" role="img" aria-label="Вымышленный архивный кадр пустого кресла у монитора"><rect width="240" height="140" fill="#151d17"/><rect x="38" y="28" width="100" height="58" fill="#0a100c" stroke="#899b81"/><path d="M45 98h110M87 86v12M162 123h46M166 91v32h36V91" fill="none" stroke="#91a18a" strokeWidth="4"/><path d="M6 105h225" stroke="#566353" strokeWidth="2"/></svg><figcaption>THE EMPTY CHAIR / повреждённый неподвижный кадр</figcaption></figure>}
+        </div>}
       </>}
     </section>
   );
