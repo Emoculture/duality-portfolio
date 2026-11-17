@@ -1,5 +1,23 @@
 import { expect, test } from "@playwright/test";
 
+test("NULL shows a brief typing state before its response", async ({ page }) => {
+  await page.clock.install();
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.addInitScript(() => {
+    localStorage.setItem("duality.v1", JSON.stringify({ mode: "archive", unlocked: true }));
+    localStorage.setItem("duality.incident.v1", JSON.stringify({ version: 1, memory: { recovered: ["LETTER"] } }));
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
+  await page.getByRole("navigation", { name: "Разделы INCIDENT 000" }).getByRole("button", { name: "/user_000/" }).click();
+  const messenger = page.getByRole("region", { name: "Переписка с NULL" });
+  await messenger.getByRole("button", { name: "Помогу", exact: true }).click();
+  await expect(messenger.getByRole("status")).toHaveText("NULL печатает…");
+  await page.clock.fastForward(700);
+  await expect(messenger).toContainText("Спасибо. Я не уверен");
+  await expect(messenger.getByRole("status")).toHaveCount(0);
+});
+
 test("CAMERA_000 reveals a distinct restored frame and a hidden photo mark", async ({ page }) => {
   await page.addInitScript(() => {
     if (!localStorage.getItem("camera-extra-seeded")) {
