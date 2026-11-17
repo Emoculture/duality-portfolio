@@ -39,7 +39,11 @@ export default function PixelCutscene({ id, replay = false, completed = false, r
   return <main className="pixel-cutscene" aria-label={item.title}>
     <div className={`pixel-room pixel-${id}`}>
       <p className="pixel-time">{item.title} / {replay && completed && id === "first" ? "2004.13.40" : "00:0" + line}</p>
-      {!failed ? <img className={`witness-sprite witness-${line}`} src="/archive/witness/witness-master.png" alt="THE WITNESS, вымышленный персонаж записи" onError={() => setFailed(true)} /> : <p>Видеосигнал повреждён. Текст записи доступен ниже.</p>}
+      {!failed ? <div className={`witness-frame ${visible < text.length ? "witness-talking" : "witness-idle"} ${id === "two" && line === 0 ? "witness-looking-down" : ""} ${id === "recording" && line === 2 ? "witness-glitch" : ""}`}>
+        <img className="witness-sprite" src="/archive/witness/witness-master.png" alt="THE WITNESS, вымышленный персонаж записи" onError={() => setFailed(true)} />
+        <img className="witness-mouth" src="/archive/witness/witness-master.png" alt="" aria-hidden="true" />
+        <span className="witness-blink" aria-hidden="true" />
+      </div> : <p>Видеосигнал повреждён. Текст записи доступен ниже.</p>}
       {replay && completed && id === "first" && line === item.lines.length && <p className="pixel-anomaly">THIS RECORDING WAS MADE TOMORROW.</p>}
       <div className="pixel-dialogue" aria-live="polite">
         <strong>{line < item.lines.length ? "THE WITNESS:" : "SYSTEM:"}</strong>

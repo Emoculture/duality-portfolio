@@ -62,6 +62,7 @@ test("recordings trigger from case progress and can be replayed without changing
   for (const [section, title] of [["/recovery/", "THE RECORDING"], ["/user_000/", "TWO USERS"], ["/ending/", "FINAL MEMORY"]]) {
     await nav.getByRole("button", { name: section, exact: true }).click();
     await expect(page.locator(".pixel-cutscene")).toContainText(title);
+    await expect(page.locator(".witness-sprite")).toHaveAttribute("src", "/archive/witness/witness-master.png");
     await page.getByRole("button", { name: "Пропустить запись" }).click();
   }
   await nav.getByRole("button", { name: "/journal/" }).click();
