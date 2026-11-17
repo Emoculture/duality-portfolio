@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { enterSavedArchive } from "./navigation";
 test("seven objectives, camera, terminal, choices and endings survive reload", async ({
   page,
 }) => {
@@ -18,6 +19,7 @@ test("seven objectives, camera, terminal, choices and endings survive reload", a
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto("/");
+  await enterSavedArchive(page);
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
   await expect(
     page.getByRole("heading", { name: "I — RESTORED" }),
@@ -84,6 +86,7 @@ test("seven objectives, camera, terminal, choices and endings survive reload", a
   await expect(page.getByText(/не удаляй единственную копию/)).toBeVisible();
   await page.getByRole("button", { name: "Что случилось в 2007?" }).click();
   await page.reload();
+  await enterSavedArchive(page);
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
   await expect(page.getByText(/Ответы:.*Что случилось в 2007/)).toBeVisible();
   await page
@@ -153,6 +156,7 @@ test("seven objectives, camera, terminal, choices and endings survive reload", a
   ).toBe(true);
   expect(errors).toEqual([]);
   await page.reload();
+  await enterSavedArchive(page);
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
   await expect(page.getByText(/PURGE, RELEASE, REPLACEMENT/)).toBeVisible();
   await page.getByRole("button", { name: "Сбросить игровой прогресс" }).click();
@@ -179,6 +183,7 @@ test("recovery puzzles, three hints, four versions and audio recordings", async 
     ),
   );
   await page.goto("/");
+  await enterSavedArchive(page);
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
   await page.getByRole("button", { name: "/history/" }).click();
   for (const year of ["2003", "2004", "2007", "2026"]) {
@@ -259,6 +264,7 @@ test("forum has 15 threads, quotes resolve and recovered post changes", async ({
     );
   });
   await page.goto("/");
+  await enterSavedArchive(page);
   await page
     .getByRole("navigation", { name: "Разделы архива" })
     .getByRole("button", { name: "/threads/", exact: true })
@@ -322,6 +328,7 @@ test("virtual desktop and every terminal command use only the fictional filesyst
     );
   });
   await page.goto("/");
+  await enterSavedArchive(page);
   await page.getByRole("button", { name: /SYSTEM_RECOVERY.EXE/ }).click();
   await expect(
     page.getByText("Виртуальная система изолирована от устройства."),
@@ -423,6 +430,7 @@ test("Internet Explorer history follows incident sections", async ({
     ),
   );
   await page.goto("/");
+  await enterSavedArchive(page);
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
   await page.getByRole("button", { name: "/history/" }).click();
   await expect(page.locator(".ie-address-value")).toContainText("/history/");
@@ -498,6 +506,7 @@ test("virtual explorer, notepad, recycle bin, viewer and start menu", async ({
     );
   });
   await page.goto("/");
+  await enterSavedArchive(page);
   await page.getByRole("button", { name: /SYSTEM_RECOVERY.EXE/ }).click();
   await page.getByLabel("Каталог").selectOption("C:\\LOGS");
   await page.getByRole("button", { name: "USER_000.LOG", exact: true }).click();
@@ -548,6 +557,7 @@ test("archive memory responds to discoveries and a return visit", async ({
     ),
   );
   await page.goto("/");
+  await enterSavedArchive(page);
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
   await expect(
     page.getByText("Этот файл никто не открывал с 2004 года."),
@@ -563,6 +573,7 @@ test("archive memory responds to discoveries and a return visit", async ({
   await page.getByRole("button", { name: "/journal/", exact: true }).click();
   await expect(page.getByText(/Ты не должен был это открывать/)).toBeVisible();
   await page.reload();
+  await enterSavedArchive(page);
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
   await expect(
     page.getByText("Этот браузер уже открывал журнал."),
@@ -582,6 +593,7 @@ test("archive documents and selected threads enter the investigation journal", a
     ),
   );
   await page.goto("/");
+  await enterSavedArchive(page);
   await page.getByRole("button", { name: /readme.txt/ }).click();
   await page.getByRole("button", { name: /image_017.jpg/ }).click();
   await page.keyboard.press("Escape");

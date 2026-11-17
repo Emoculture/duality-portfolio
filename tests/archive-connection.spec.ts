@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { enterSavedArchive } from "./navigation";
 
 test("wrong key stays in game; successful first connection finishes without looping", async ({ page }) => {
   await page.clock.install();
@@ -22,6 +23,7 @@ test("wrong key stays in game; successful first connection finishes without loop
   await expect(page.locator(".archive-board")).toBeVisible();
   await expect(sequence).toHaveCount(0);
   await page.reload();
+  await enterSavedArchive(page);
   await expect(page.locator(".archive-board")).toBeVisible();
   await expect(sequence).toHaveCount(0);
 });
@@ -34,6 +36,8 @@ test("returning player can skip connection without losing progress", async ({ pa
   });
   await page.setViewportSize({ width: 320, height: 740 });
   await page.goto("/");
+  await page.getByRole("button", { name: "Неизвестный объект" }).click();
+  await page.clock.fastForward(700);
   await page.getByRole("button", { name: /ACCESS.EXE/ }).click();
   await page.getByLabel("Ключ доступа").fill("ECHO-04-17");
   await page.getByRole("button", { name: "Открыть архив" }).click();
@@ -51,6 +55,8 @@ test("reduced motion uses a short static connection", async ({ page }) => {
   await page.clock.install();
   await page.addInitScript(() => localStorage.setItem("duality.v1", JSON.stringify({ mode: "game" })));
   await page.goto("/");
+  await page.getByRole("button", { name: "Неизвестный объект" }).click();
+  await page.clock.fastForward(700);
   await page.getByRole("button", { name: /ACCESS.EXE/ }).click();
   await page.getByLabel("Ключ доступа").fill("ECHO-04-17");
   await page.getByRole("button", { name: "Открыть архив" }).click();
@@ -67,6 +73,7 @@ test("archive traces follow chapter progress without changing the light shell", 
   });
   await page.emulateMedia({ reducedMotion: "reduce", colorScheme: "dark" });
   await page.goto("/");
+  await enterSavedArchive(page);
   await expect(page.locator(".archive-board")).toHaveAttribute("data-incident-stage", "7");
   await expect(page.locator(".archive-board")).toHaveCSS("background-color", "rgb(234, 230, 216)");
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
@@ -84,6 +91,7 @@ test("observer progresses once, and the fictional window records its choice", as
     }
   });
   await page.goto("/");
+  await enterSavedArchive(page);
   await expect(page.locator(".archive-observer")).toContainText("OBSERVER STATUS: ACTIVE");
   await page.locator(".observer-window").getByRole("button", { name: "WAIT" }).click();
   await expect(page.locator(".archive-observer")).toContainText("Я ждал ответа");
@@ -91,6 +99,7 @@ test("observer progresses once, and the fictional window records its choice", as
   await expect(page.locator(".archive-observer")).toContainText("OBSERVER STATUS: OBSERVED");
   await expect(page.locator(".archive-observer")).toContainText("THERE ARE TWO OF YOU.");
   await page.reload();
+  await enterSavedArchive(page);
   await expect(page.locator(".archive-observer")).toContainText("OBSERVER STATUS: OBSERVED");
   await expect(page.locator(".observer-window")).toHaveCount(0);
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
@@ -107,6 +116,8 @@ test("first and later post-ending connection show different fictional frames", a
     }
   });
   await page.goto("/");
+  await page.getByRole("button", { name: "Неизвестный объект" }).click();
+  await page.clock.fastForward(700);
   await page.getByRole("button", { name: /ACCESS.EXE/ }).click();
   await page.getByLabel("Ключ доступа").fill("ECHO-04-17");
   await page.getByRole("button", { name: "Открыть архив" }).click();
@@ -125,12 +136,14 @@ test("first and later post-ending connection show different fictional frames", a
 test("sound is off by default and the preference persists", async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem("duality.v1", JSON.stringify({ mode: "archive", unlocked: true })));
   await page.goto("/");
+  await enterSavedArchive(page);
   await page.getByRole("button", { name: "Настройки", exact: true }).click();
   const sound = page.getByRole("button", { name: /Звук эффектов/ });
   await expect(sound).toHaveText("Звук эффектов: выключен");
   await sound.click();
   await expect(sound).toHaveText("Звук эффектов: включён");
   await page.reload();
+  await enterSavedArchive(page);
   await page.getByRole("button", { name: "Настройки", exact: true }).click();
   await expect(sound).toHaveText("Звук эффектов: включён");
   await sound.click();
@@ -146,6 +159,7 @@ test("observer stays hidden in early chapters and TERMINATE is remembered", asyn
     }
   });
   await page.goto("/");
+  await enterSavedArchive(page);
   await expect(page.locator(".archive-observer")).toHaveCount(0);
   await page.evaluate(() => {
     const save = JSON.parse(localStorage.getItem("duality.incident.v1")!);
@@ -153,9 +167,11 @@ test("observer stays hidden in early chapters and TERMINATE is remembered", asyn
     localStorage.setItem("duality.incident.v1", JSON.stringify(save));
   });
   await page.reload();
+  await enterSavedArchive(page);
   await page.getByRole("button", { name: "TERMINATE" }).click();
   await expect(page.locator(".archive-observer")).toContainText("попытка закрытия записана");
   await page.reload();
+  await enterSavedArchive(page);
   await expect(page.locator(".observer-window")).toHaveCount(0);
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
   await expect(page.locator(".incident-journal")).toContainText("попытка закрытия окна");
@@ -164,6 +180,7 @@ test("observer stays hidden in early chapters and TERMINATE is remembered", asyn
 test("a connection rendering error falls through to the unlocked archive", async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem("duality.v1", JSON.stringify({ mode: "game" })));
   await page.goto("/");
+  await page.getByRole("button", { name: "Неизвестный объект" }).click();
   await page.getByRole("button", { name: /ACCESS.EXE/ }).click();
   await page.getByLabel("Ключ доступа").fill("ECHO-04-17");
   await page.evaluate(() => { window.matchMedia = () => { throw new Error("simulated cinematic failure"); }; });

@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { enterSavedArchive } from "./navigation";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 
@@ -28,6 +29,7 @@ async function openArchive(page: import("@playwright/test").Page) {
     ),
   );
   await page.goto("/");
+  await enterSavedArchive(page);
 }
 
 test("all seven portrait stages use the original file and survive reload", async ({
@@ -43,6 +45,7 @@ test("all seven portrait stages use the original file and survive reload", async
       { ...initial, clues: clues.slice(0, n) },
     );
     await page.reload();
+  await enterSavedArchive(page);
     await expect(portrait).toHaveAttribute("data-avatar-stage", String(n + 1));
     if (n === 0) {
       await expect(portrait).toHaveAttribute("src", "/archive/user-000.png");
@@ -112,6 +115,7 @@ test("chapter progress updates portrait live and reset restores the original", a
     .click();
   await expect(portrait).toHaveAttribute("data-avatar-stage", "3");
   await page.reload();
+  await enterSavedArchive(page);
   await expect(portrait).toHaveAttribute("data-avatar-stage", "3");
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
   await page.getByRole("button", { name: "Сбросить игровой прогресс" }).click();
@@ -152,6 +156,7 @@ test("directory labels navigate and shell remains light in dark system mode", as
     localStorage.setItem("theme", "dark");
   });
   await page.goto("/");
+  await enterSavedArchive(page);
   const shell = page.locator(".archive-board");
   await expect(shell).toHaveCSS("color-scheme", /light/);
   await expect(page.locator(".ie-titlebar")).toHaveCSS(
@@ -192,6 +197,7 @@ test("directory labels navigate and shell remains light in dark system mode", as
     ).toBe(true);
   }
   await page.reload();
+  await enterSavedArchive(page);
   await expect(page.locator(".ie-titlebar")).toHaveCSS(
     "background-color",
     "rgb(8, 21, 101)",
@@ -214,6 +220,7 @@ test("document, archive and native controls have the same colours in both system
   const snapshot = async (scheme: "light" | "dark") => {
     await page.emulateMedia({ colorScheme: scheme, reducedMotion: "reduce" });
     await page.reload();
+  await enterSavedArchive(page);
     await expect(page.locator(".archive-board")).toBeVisible();
     await page.mouse.move(0, 0);
 
@@ -279,6 +286,7 @@ test("portrait is static with reduced motion and NORMAL stays unchanged", async 
     },
   );
   await page.reload();
+  await enterSavedArchive(page);
   const portrait = page.locator(".retro-avatar-button canvas");
   await expect(portrait).toHaveAttribute("data-avatar-stage", "7");
   await expect(portrait).toHaveAttribute("data-avatar-ready", "true");
@@ -297,6 +305,7 @@ test("portrait is static with reduced motion and NORMAL stays unchanged", async 
     ),
   );
   await page.reload();
+  await page.getByRole("button", { name: "Войти на сайт" }).click();
   await expect(page.locator(".portfolio")).toBeVisible();
   await expect(
     page.locator(".portfolio canvas, .portfolio [data-avatar-stage]"),
@@ -337,6 +346,7 @@ test("light shell preserves the intentionally dark PURGE scene", async ({
     );
   });
   await page.goto("/");
+  await enterSavedArchive(page);
   await expect(page.locator(".ie-titlebar")).toHaveCSS(
     "background-color",
     "rgb(8, 21, 101)",

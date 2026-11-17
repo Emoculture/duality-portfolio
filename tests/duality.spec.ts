@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { enterSavedArchive } from "./navigation";
 async function enterGame(page: Page) {
   await page.goto("/");
   await page.getByRole("button", { name: "Исследовать деталь" }).click();
@@ -45,6 +46,7 @@ test("welcome and full professional portfolio", async ({ page }) => {
   ).toHaveAttribute("href", "https://cut-culture.vercel.app/");
   await noOverflow(page);
   await page.reload();
+  await page.getByRole("button", { name: "Войти на сайт" }).click();
   await expect(page.locator("#home")).toBeVisible();
   expect(errors).toEqual([]);
 });
@@ -83,6 +85,7 @@ test("files, wrong password, correct password, archive puzzle and persistence", 
   ).toBeVisible();
   await noOverflow(page);
   await page.reload();
+  await enterSavedArchive(page);
   await expect(
     page.getByRole("heading", { name: "Вы нашли другую сторону." }),
   ).toBeVisible();
@@ -160,6 +163,7 @@ test("classic imageboard boards, cross-thread quotes, thumbnails and hidden reco
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto("/");
+  await enterSavedArchive(page);
   await expect(page.getByRole("heading", { name: /Boards/ })).toBeVisible();
   await expect(
     page.getByRole("heading", { name: /Popular Threads/ }),
@@ -236,6 +240,7 @@ test("investigation clues, hints, persistence, ending and replay at 320px", asyn
     ),
   );
   await page.goto("/");
+  await enterSavedArchive(page);
   await page.getByRole("button", { name: /INVESTIGATION.TXT/ }).click();
   await page.getByRole("button", { name: "Подсказка" }).click();
   await expect(
@@ -258,6 +263,7 @@ test("investigation clues, hints, persistence, ending and replay at 320px", asyn
   ).toBeVisible();
   await noOverflow(page);
   await page.reload();
+  await enterSavedArchive(page);
   await page.getByRole("button", { name: /INVESTIGATION.TXT/ }).click();
   await expect(page.getByText("Найдено улик: 6 / 6")).toBeVisible();
   await page
@@ -279,6 +285,7 @@ test("project filters and repository links in both modes", async ({ page }) => {
     ),
   );
   await page.goto("/");
+  await page.getByRole("button", { name: "Войти на сайт" }).click();
   await page
     .getByLabel("Фильтр проектов")
     .selectOption({ label: "TELEGRAM MINI APP" });
@@ -317,6 +324,7 @@ test("retro browser history, files and window controls", async ({ page }) => {
     ),
   );
   await page.goto("/");
+  await enterSavedArchive(page);
   await expect(
     page.getByText("/archive/ — Личный архив — Microsoft Internet Explorer"),
   ).toBeVisible();
@@ -372,6 +380,7 @@ test("home quotes, project search and portrait", async ({ page }) => {
     ),
   );
   await page.goto("/");
+  await enterSavedArchive(page);
   await expect(page.locator(".retro-avatar-button img")).toHaveAttribute(
     "src",
     "/archive/user-000.png",

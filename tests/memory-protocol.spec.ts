@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { enterSavedArchive } from "./navigation";
 
 test("NULL shows a brief typing state before its response", async ({ page }) => {
   await page.clock.install();
@@ -8,6 +9,7 @@ test("NULL shows a brief typing state before its response", async ({ page }) => 
     localStorage.setItem("duality.incident.v1", JSON.stringify({ version: 1, memory: { recovered: ["LETTER"] } }));
   });
   await page.goto("/");
+  await enterSavedArchive(page);
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
   await page.getByRole("navigation", { name: "Разделы INCIDENT 000" }).getByRole("button", { name: "/user_000/" }).click();
   const messenger = page.getByRole("region", { name: "Переписка с NULL" });
@@ -27,6 +29,7 @@ test("CAMERA_000 reveals a distinct restored frame and a hidden photo mark", asy
     }
   });
   await page.goto("/");
+  await enterSavedArchive(page);
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
   await page.getByRole("navigation", { name: "Разделы INCIDENT 000" }).getByRole("button", { name: "/cctv/" }).click();
   await expect(page.locator(".memory-camera-mark")).toContainText("017");
@@ -38,6 +41,7 @@ test("CAMERA_000 reveals a distinct restored frame and a hidden photo mark", asy
     localStorage.setItem("duality.incident.v1", JSON.stringify(saved));
   });
   await page.reload();
+  await enterSavedArchive(page);
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
   await page.getByRole("navigation", { name: "Разделы INCIDENT 000" }).getByRole("button", { name: "/cctv/" }).click();
   await page.getByLabel("Таймкод").selectOption("00:02");
@@ -58,6 +62,7 @@ for (const choice of ["memory", "record"] as const) {
       }
     });
     await page.goto("/");
+  await enterSavedArchive(page);
     await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
     const nav = page.getByRole("navigation", { name: "Разделы INCIDENT 000" });
     await nav.getByRole("button", { name: "/user_000/" }).click();
@@ -66,6 +71,7 @@ for (const choice of ["memory", "record"] as const) {
     await expect(messenger).toContainText("Справедливо");
     await messenger.getByRole("button", { name: choice === "memory" ? "Сохранить воспоминание" : "Сверить с записью" }).click();
     await page.reload();
+  await enterSavedArchive(page);
     await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
     await expect(page.locator(".incident-journal")).toContainText(choice === "memory" ? "версия воспоминания" : "версия записи");
     await nav.getByRole("button", { name: "/user_000/" }).click();
@@ -82,6 +88,7 @@ test("additional photo, log and transcript recover with clues and survive reload
     }
   });
   await page.goto("/");
+  await enterSavedArchive(page);
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
   await page.getByRole("navigation", { name: "Разделы INCIDENT 000" }).getByRole("button", { name: "/recovery/" }).click();
   const files = page.getByRole("region", { name: "Дополнительные восстановленные файлы" });
@@ -97,6 +104,7 @@ test("additional photo, log and transcript recover with clues and survive reload
   await files.getByRole("button", { name: "Восстановить расшифровку" }).click();
   await expect(files).toContainText("VOICE_2007.TXT — RECOVERED");
   await page.reload();
+  await enterSavedArchive(page);
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
   await expect(page.locator(".incident-journal")).toContainText("PHOTO_000.JPG");
   await expect(page.locator(".incident-journal")).toContainText("SERVER_2007.LOG");
@@ -116,6 +124,7 @@ test("legacy incident save migrates, remembers returns, and resets only on confi
     }
   });
   await page.goto("/");
+  await enterSavedArchive(page);
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
   const journal = page.locator(".incident-journal");
   await expect(journal).toContainText("Входов в архив: 1");
@@ -123,6 +132,7 @@ test("legacy incident save migrates, remembers returns, and resets only on confi
   await expect(journal).toContainText("OLD.TXT");
   await expect(journal).toContainText("RELEASE");
   await page.reload();
+  await enterSavedArchive(page);
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
   await expect(journal).toContainText("Входов в архив: 2");
   await expect(journal).toContainText("Ты снова здесь");
@@ -146,6 +156,7 @@ test("invalid saved memory does not break the archive", async ({ page }) => {
     localStorage.setItem("duality.incident.v1", "{broken");
   });
   await page.goto("/");
+  await enterSavedArchive(page);
   await expect(page.locator(".archive-board")).toBeVisible();
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
   await expect(page.locator(".incident-journal")).toContainText("Входов в архив: 1");
@@ -160,6 +171,7 @@ test("forum changes, recovered letter and CAMERA_000 evidence survive reload", a
     }
   });
   await page.goto("/");
+  await enterSavedArchive(page);
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
   const nav = page.getByRole("navigation", { name: "Разделы INCIDENT 000" });
   await nav.getByRole("button", { name: "/threads/" }).click();
@@ -173,6 +185,7 @@ test("forum changes, recovered letter and CAMERA_000 evidence survive reload", a
   await page.getByLabel("Таймкод").selectOption("00:01");
   await page.getByRole("button", { name: "Сохранить кадр CAMERA_000" }).click();
   await page.reload();
+  await enterSavedArchive(page);
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
   const dossier = page.getByRole("region", { name: "Дело о пропавшем человеке" });
   await expect(dossier).toContainText("запись №1410 сохранена");
@@ -190,6 +203,7 @@ test("NULL choices, timer and ADMIN_1999 persist", async ({ page }) => {
     }
   });
   await page.goto("/");
+  await enterSavedArchive(page);
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
   const procedure = page.getByRole("region", { name: "Процедура восстановления памяти" });
   await procedure.getByRole("button", { name: "Запустить MIDNIGHT EVENT" }).click();
@@ -200,6 +214,7 @@ test("NULL choices, timer and ADMIN_1999 persist", async ({ page }) => {
     localStorage.setItem("duality.incident.v1", JSON.stringify(save));
   });
   await page.reload();
+  await enterSavedArchive(page);
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
   await expect(procedure).toContainText("процедура завершена");
   await procedure.getByLabel("Код ADMIN_1999").fill("TRACE-0001");
@@ -211,6 +226,7 @@ test("NULL choices, timer and ADMIN_1999 persist", async ({ page }) => {
   await messenger.getByRole("button", { name: "Сначала докажи" }).click();
   await messenger.getByRole("button", { name: "Сохранить ответ NULL" }).click();
   await page.reload();
+  await enterSavedArchive(page);
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
   await expect(procedure).toContainText("ДОСТУП ОТКРЫТ");
   await nav.getByRole("button", { name: "/user_000/" }).click();
@@ -230,6 +246,7 @@ test("secret ending requires the case evidence and survives a new run", async ({
     }
   });
   await page.goto("/");
+  await enterSavedArchive(page);
   await expect(page.locator(".archive-board")).toHaveAttribute("data-incident-stage", "7");
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
   const nav = page.getByRole("navigation", { name: "Разделы INCIDENT 000" });
@@ -241,6 +258,7 @@ test("secret ending requires the case evidence and survives a new run", async ({
   await page.getByRole("button", { name: "Запустить MEMORY PROTOCOL" }).click();
   await expect(page.locator(".incident-ending")).toContainText("MEMORY PROTOCOL");
   await page.reload();
+  await enterSavedArchive(page);
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
   await expect(page.locator(".incident-journal")).toContainText("MEMORY_PROTOCOL");
   await page.getByRole("button", { name: "Сбросить игровой прогресс" }).click();
@@ -260,6 +278,7 @@ test("rejected storage writes keep the current session playable", async ({ page 
     };
   });
   await page.goto("/");
+  await enterSavedArchive(page);
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
   const nav = page.getByRole("navigation", { name: "Разделы INCIDENT 000" });
   await nav.getByRole("button", { name: "/recovery/" }).click();
@@ -278,6 +297,7 @@ test("new investigation fits narrow viewports without console errors", async ({ 
   });
   await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
   await page.goto("/");
+  await enterSavedArchive(page);
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
   const nav = page.getByRole("navigation", { name: "Разделы INCIDENT 000" });
   for (const width of [320, 375, 390, 430]) {
@@ -296,6 +316,7 @@ test("complete new investigation is reachable through existing chapters", async 
     localStorage.setItem("duality.v1", JSON.stringify({ mode: "archive", unlocked: true, discovered: true }));
   });
   await page.goto("/");
+  await enterSavedArchive(page);
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
   const nav = page.getByRole("navigation", { name: "Разделы INCIDENT 000" });
   const open = async (label: string) => nav.getByRole("button", { name: label, exact: true }).click();
