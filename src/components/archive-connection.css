@@ -4,6 +4,8 @@
 .connection-screen h1 { font: bold 15px/1.4 "Courier New", monospace; letter-spacing: .08em; color: #a3c69b; }
 .connection-screen p { margin: 0 0 1em; }
 .connection-log { margin-top: 2em; }
+.connection-log::after { content: "_"; display: inline-block; animation: connection-cursor 1.1s steps(1) infinite; }
+.connection-log p { animation: connection-line .35s ease-out both; }
 .connection-error { color: #c77570; }
 .connection-window { position: relative; z-index: 1; padding: 12px; border: 2px outset #818981; background: #c6c8bc; color: #18251a; }
 .connection-progress { height: 20px; border: 2px inset #eee; background: #eeeee2; }
@@ -12,4 +14,6 @@
 .connection-last-frame { position: absolute; z-index: 2; top: 34%; right: 5%; width: min(240px, 60%); border: 1px solid #667b65; image-rendering: pixelated; }
 .connection-final { color: #d5dfcf; margin-top: 3em !important; }
 .connection-skip { position: relative; z-index: 3; padding: 10px 16px; border: 2px outset #c6c6bb; background: #c6c6bb; color: #141a14; font: inherit; cursor: pointer; }
-@media (prefers-reduced-motion: reduce) { .connection-screen::after { display: none; } }
+@keyframes connection-cursor { 50% { opacity: 0; } }
+@keyframes connection-line { from { opacity: .25; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .connection-screen::after { display: none; } .connection-log::after, .connection-log p { animation: none; } }
