@@ -1,13 +1,18 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { portfolio, projectRepositories } from "../data";
 import { validEcho } from "../state";
 import { boards, threads, imageSource, type ArchivePage } from "../archiveData";
 import ArchiveThreads from "./ArchiveThreads";
 import Investigation from "./Investigation";
 import Incident, { type View as IncidentView } from "../incident/Incident";
-import { loadIncident, remember } from "../incident/state";
+import { avatarStage, loadIncident, remember, subscribeAvatarStage } from "../incident/state";
+import ArchivePortrait from "./ArchivePortrait";
 import ArchiveImage from "./ArchiveImage";
 import "../archive.css";
+const incidentDirectories: Record<IncidentView, string> = {
+  journal: "journal", forum: "threads", recovery: "recovery", cctv: "cctv",
+  system: "system", history: "history", audio: "audio", dialogue: "user_000", decision: "ending",
+};
 export default function Archive({
   onExit,
   onReplay,
@@ -24,6 +29,7 @@ export default function Archive({
   onPuzzle: () => void;
 }) {
   const [page, setPage] = useState<ArchivePage>("home");
+  const portraitStage = useSyncExternalStore(subscribeAvatarStage, avatarStage, () => 1);
   const [minimized, setMinimized] = useState(false);
   const [maximized, setMaximized] = useState(true);
   const [showSearch, setShowSearch] = useState(false);
@@ -214,7 +220,7 @@ export default function Archive({
               <span>Адрес:</span>
               <span className="ie-address-value">
                 ▣ http://archive.local/
-                {page === "home" ? "" : page === "incident" ? incidentStart + "/" : page + "/"}
+                {page === "home" ? "" : page === "incident" ? incidentDirectories[incidentStart] + "/" : page + "/"}
               </span>
               <button
                 onClick={() => navigate("home")}
@@ -804,10 +810,11 @@ export default function Archive({
               {page === "zero" && (
                 <section className="ib-box">
                   <h2>/000/ — Пользователь №000</h2>
-                  <img
+                  <ArchivePortrait
+                    stage={portraitStage}
                     className="retro-profile-avatar"
-                    src="/archive/user-000.png"
                     alt="Портрет пользователя №000"
+                    square
                   />
                   <div className="ib-box-body">
                     <p>
@@ -859,8 +866,8 @@ export default function Archive({
                   onClick={() => navigate("zero")}
                   aria-label="Открыть профиль пользователя №000"
                 >
-                  <img
-                    src="/archive/user-000.png"
+                  <ArchivePortrait
+                    stage={portraitStage}
                     alt="Портрет вымышленного пользователя №000"
                   />
                 </button>

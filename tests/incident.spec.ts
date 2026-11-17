@@ -25,7 +25,10 @@ test("seven objectives, camera, terminal, choices and endings survive reload", a
   await expect(
     page.getByText(/Импортировано старое расследование: 4\/6/),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Треды", exact: true }).click();
+  await page
+    .getByRole("navigation", { name: "Разделы INCIDENT 000" })
+    .getByRole("button", { name: "/threads/", exact: true })
+    .click();
   await page.getByRole("button", { name: "Прочитать ответ №000" }).click();
   await page
     .getByRole("button", { name: "Сохранить заметку модератора" })
@@ -73,21 +76,27 @@ test("seven objectives, camera, terminal, choices and endings survive reload", a
   await expect(
     page.getByText("Код принят. Доступ администратора восстановлен."),
   ).toBeVisible();
-  await page.getByRole("button", { name: "№000", exact: true }).last().click();
+  await page
+    .getByRole("button", { name: "/user_000/", exact: true })
+    .last()
+    .click();
   await page.getByRole("button", { name: "Я помогу вспомнить" }).click();
   await expect(page.getByText(/не удаляй единственную копию/)).toBeVisible();
   await page.getByRole("button", { name: "Что случилось в 2007?" }).click();
   await page.reload();
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
   await expect(page.getByText(/Ответы:.*Что случилось в 2007/)).toBeVisible();
-  await page.getByRole("button", { name: "№000", exact: true }).last().click();
+  await page
+    .getByRole("button", { name: "/user_000/", exact: true })
+    .last()
+    .click();
   await expect(
     page.getByText(/Копия загрузилась без администратора/),
   ).toBeVisible();
   await page.getByRole("button", { name: "/audio/" }).click();
   await page.getByText("Расшифровка").last().click();
   await expect(page.getByText(/Последнее слово — MEMORY/)).toBeVisible();
-  await page.getByRole("button", { name: "Финал", exact: true }).click();
+  await page.getByRole("button", { name: "/ending/", exact: true }).click();
   await page.getByLabel("Последний ключ").fill("MEMORY-0001");
   await page.getByRole("button", { name: "Проверить ключ" }).click();
   await page.getByRole("button", { name: "Удалить архив" }).click();
@@ -95,13 +104,16 @@ test("seven objectives, camera, terminal, choices and endings survive reload", a
   await page.getByRole("button", { name: "Домой", exact: true }).click();
   await expect(page.locator(".purged-home")).toContainText("1 FILE REMAINS");
   await page.getByRole("button", { name: "Открыть оставшийся файл" }).click();
-  await page.getByRole("button", { name: "Финал", exact: true }).click();
+  await page.getByRole("button", { name: "/ending/", exact: true }).click();
   await page.getByRole("button", { name: "Освободить №000" }).click();
   await expect(page.getByText("RELEASE", { exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "/threads/", exact: true }).click();
+  await page
+    .getByRole("navigation", { name: "Разделы архива" })
+    .getByRole("button", { name: "/threads/", exact: true })
+    .click();
   await expect(page.locator("#post-1370")).toContainText("[восстановлено]");
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
-  await page.getByRole("button", { name: "Финал", exact: true }).click();
+  await page.getByRole("button", { name: "/ending/", exact: true }).click();
   await page.getByRole("button", { name: "Стать администратором" }).click();
   await expect(page.getByText("WELCOME BACK, ADMINISTRATOR")).toBeVisible();
   await page.getByRole("button", { name: "/system/" }).click();
@@ -116,7 +128,7 @@ test("seven objectives, camera, terminal, choices and endings survive reload", a
     /incident-replacement/,
   );
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
-  await page.getByRole("button", { name: "Финал", exact: true }).click();
+  await page.getByRole("button", { name: "/ending/", exact: true }).click();
   await page
     .getByRole("button", { name: "Начать заново, сохранив концовки" })
     .click();
@@ -131,7 +143,7 @@ test("seven objectives, camera, terminal, choices and endings survive reload", a
   await expect(
     page.getByRole("button", { name: "Фрагмент 2, позиция 1" }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Журнал", exact: true }).click();
+  await page.getByRole("button", { name: "/journal/", exact: true }).click();
   expect(
     await page.evaluate(
       () =>
@@ -224,7 +236,7 @@ test("recovery puzzles, three hints, four versions and audio recordings", async 
   }
   await page.getByText("Расшифровка").last().click();
   await expect(page.getByText(/Код восстановления: 000-0102/)).toBeVisible();
-  await page.getByRole("button", { name: "Журнал", exact: true }).click();
+  await page.getByRole("button", { name: "/journal/", exact: true }).click();
   await expect(page.getByText(/LOG_2004.TXT/)).toBeVisible();
   await expect(page.getByText(/MEMORY.DAT/)).toBeVisible();
   expect(
@@ -247,7 +259,10 @@ test("forum has 15 threads, quotes resolve and recovered post changes", async ({
     );
   });
   await page.goto("/");
-  await page.getByRole("button", { name: "/threads/", exact: true }).click();
+  await page
+    .getByRole("navigation", { name: "Разделы архива" })
+    .getByRole("button", { name: "/threads/", exact: true })
+    .click();
   await expect(page.locator(".ib-thread")).toHaveCount(15);
   await expect(page.locator("#post-1370")).toContainText(
     "ответ удалён модератором",
@@ -268,7 +283,10 @@ test("forum has 15 threads, quotes resolve and recovered post changes", async ({
   await log.getByLabel("Камера").fill("00:01");
   await log.getByLabel("Сервер").fill("00:02");
   await log.getByRole("button", { name: "Восстановить журнал" }).click();
-  await page.getByRole("button", { name: "/threads/", exact: true }).click();
+  await page
+    .getByRole("navigation", { name: "Разделы архива" })
+    .getByRole("button", { name: "/threads/", exact: true })
+    .click();
   await expect(page.locator("#post-1370")).toContainText("[восстановлено]");
   expect(
     await page.evaluate(
@@ -439,7 +457,10 @@ test("incident remains usable across archive pages when storage is denied", asyn
     page.getByRole("heading", { name: "Вы нашли другую сторону." }),
   ).toBeVisible();
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
-  await page.getByRole("button", { name: "Треды", exact: true }).click();
+  await page
+    .getByRole("navigation", { name: "Разделы INCIDENT 000" })
+    .getByRole("button", { name: "/threads/", exact: true })
+    .click();
   await page.getByRole("button", { name: "Прочитать ответ №000" }).click();
   await page
     .getByRole("button", { name: "Сохранить заметку модератора" })
@@ -505,7 +526,7 @@ test("virtual explorer, notepad, recycle bin, viewer and start menu", async ({
   await expect(
     page.locator(".system-window").filter({ has: page.getByLabel("Каталог") }),
   ).toHaveCSS("z-index", "2");
-  await page.getByRole("button", { name: "Журнал", exact: true }).click();
+  await page.getByRole("button", { name: "/journal/", exact: true }).click();
   await expect(page.getByText(/USER_000.LOG/)).toBeVisible();
   expect(
     await page.evaluate(
@@ -530,12 +551,15 @@ test("archive memory responds to discoveries and a return visit", async ({
   await expect(
     page.getByText("Этот файл никто не открывал с 2004 года."),
   ).toBeVisible();
-  await page.getByRole("button", { name: "Треды", exact: true }).click();
+  await page
+    .getByRole("navigation", { name: "Разделы INCIDENT 000" })
+    .getByRole("button", { name: "/threads/", exact: true })
+    .click();
   await page.getByRole("button", { name: "Прочитать ответ №000" }).click();
   await page
     .getByRole("button", { name: "Сохранить заметку модератора" })
     .click();
-  await page.getByRole("button", { name: "Журнал", exact: true }).click();
+  await page.getByRole("button", { name: "/journal/", exact: true }).click();
   await expect(page.getByText(/Ты не должен был это открывать/)).toBeVisible();
   await page.reload();
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
@@ -560,7 +584,10 @@ test("archive documents and selected threads enter the investigation journal", a
   await page.getByRole("button", { name: /readme.txt/ }).click();
   await page.getByRole("button", { name: /image_017.jpg/ }).click();
   await page.keyboard.press("Escape");
-  await page.getByRole("button", { name: "/threads/", exact: true }).click();
+  await page
+    .getByRole("navigation", { name: "Разделы архива" })
+    .getByRole("button", { name: "/threads/", exact: true })
+    .click();
   await page.getByRole("button", { name: "[Открыть тред]" }).first().click();
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
   await expect(page.getByText(/README.NFO/)).toBeVisible();

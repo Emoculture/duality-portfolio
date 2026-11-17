@@ -239,15 +239,6 @@
 .incident article h4 {
   margin: 12px 0 4px;
 }
-.archive-board.incident-replacement .retro-layout {
-  background-color: #b9bdab;
-}
-.archive-board.incident-replacement .ie-titlebar {
-  background: #233729;
-}
-.archive-board.incident-replacement .retro-banner {
-  border-color: #789371;
-}
 .history-version {
   border: 2px ridge #bbb;
   background: #faf3da;

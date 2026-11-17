@@ -199,18 +199,18 @@ export default function Incident({
         Восстановленная копия · действия и улики хранятся только в этом
         браузере.
       </p>
-      <div className="incident-nav">
+      <nav className="incident-nav" aria-label="Разделы INCIDENT 000">
         {(
           [
-            ["journal", "Журнал"],
-            ["forum", "Треды"],
+            ["journal", "/journal/"],
+            ["forum", "/threads/"],
             ["recovery", "/recovery/"],
             ["cctv", "/cctv/"],
             ["system", "/system/"],
             ["history", "/history/"],
             ["audio", "/audio/"],
-            ["dialogue", "№000"],
-            ["decision", "Финал"],
+            ["dialogue", "/user_000/"],
+            ["decision", "/ending/"],
           ] as [View, string][]
         ).map(([v, label]) => (
           <button
@@ -225,7 +225,7 @@ export default function Incident({
             {label}
           </button>
         ))}
-      </div>
+      </nav>
       {view === "journal" && (
         <>
           <div className="incident-panel">
