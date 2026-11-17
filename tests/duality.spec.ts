@@ -140,3 +140,83 @@ test("320px layout across every reality and archive section", async ({
   await page.getByRole("button", { name: "Настройки", exact: true }).click();
   await noOverflow(page);
 });
+
+test("classic imageboard boards, cross-thread quotes, thumbnails and hidden records", async ({
+  page,
+}) => {
+  await page.addInitScript(() =>
+    localStorage.setItem(
+      "duality.v1",
+      JSON.stringify({
+        mode: "archive",
+        unlocked: true,
+        discovered: true,
+        puzzle: true,
+        reduced: true,
+      }),
+    ),
+  );
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: /Boards/ })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: /Popular Threads/ }),
+  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Stats/ })).toBeVisible();
+  await expect(page.locator(".ib-shell")).toHaveCSS("max-width", "740px");
+  await expect(page.locator(".ib-box").first()).toHaveCSS(
+    "background-color",
+    "rgb(255, 255, 238)",
+  );
+  for (const name of [
+    "/dev/ — Проекты",
+    "/me/ — Об авторе",
+    "/lost/ — Потерянные файлы",
+    "/x/ — Паранормальное",
+    "/log/ — Журналы",
+    "/000/ — Пользователь №000",
+  ])
+    await expect(page.getByRole("button", { name, exact: true })).toBeVisible();
+  await page
+    .getByRole("button", { name: "Открыть тред: Комната без адреса" })
+    .click();
+  await expect(page.locator("#post-1278")).toBeVisible();
+  await page.getByRole("link", { name: ">>1273", exact: true }).click();
+  await expect(page.locator("#post-1273")).toBeFocused();
+  await expect(page.locator("#post-1278")).toHaveCount(0);
+  await page.getByRole("button", { name: "Увеличить снимок 1273" }).click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).not.toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Увеличить снимок 1273" }),
+  ).toBeFocused();
+  await page.getByRole("button", { name: "/home/", exact: true }).click();
+  await page
+    .getByRole("button", { name: "/log/ — Журналы", exact: true })
+    .click();
+  await page.getByText("RECORD_017 — показать запись").click();
+  await expect(
+    page.getByText("[ запись исчезла из последней копии ]", { exact: true }),
+  ).toBeVisible();
+  await noOverflow(page);
+  await page.getByRole("button", { name: "/home/", exact: true }).click();
+  await page
+    .getByRole("button", { name: "/000/ — Пользователь №000", exact: true })
+    .click();
+  await page.getByRole("button", { name: "№000", exact: true }).click();
+  await expect(page.getByText(/Спасибо, что заметили/)).toBeVisible();
+  await page.getByText("Просмотреть заголовки страницы").click();
+  await page
+    .getByRole("button", { name: "Открыть оставшуюся страницу" })
+    .click();
+  await expect(
+    page.getByText("Файл создан: после вашего входа."),
+  ).toBeVisible();
+  await expect(
+    page.getByText("LIGHT_KEEPER / СКРЫТАЯ ЗАПИСЬ ВОССТАНОВЛЕНА"),
+  ).toBeVisible();
+  await noOverflow(page);
+  expect(errors).toEqual([]);
+});
