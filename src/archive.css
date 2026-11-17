@@ -2,6 +2,7 @@
    Keep every selector scoped: the portfolio and recovery desktop are separate. */
 .archive-board {
   min-height: 100svh;
+  color-scheme: only light;
   background: linear-gradient(#fed6bd 0, #fff0dc 110px, #ffffee 260px);
   color: #800000;
   font:
@@ -943,7 +944,7 @@
   max-width: none;
   margin: 0;
   border: 2px inset #eee;
-  background: #dedbd0;
+  background: #f3eedf;
   color: #111;
 }
 .archive-board .ib-shell.ie-windowed {
@@ -956,7 +957,7 @@
   align-items: start;
   gap: 6px;
   padding: 5px;
-  background-color: #d8d5c9;
+  background-color: #ede9d9;
   background-image:
     repeating-linear-gradient(
       0deg,
@@ -981,7 +982,7 @@
 .retro-left,
 .retro-right {
   border: 1px solid #939083;
-  background: #dfdcd1;
+  background: #f0ecdc;
   padding: 5px;
   min-height: 650px;
 }
@@ -1321,7 +1322,7 @@
   font: 11px Arial;
 }
 .archive-board .ib-box {
-  background: #e4e1d7;
+  background: #f3eedf;
   border-color: #999;
 }
 .archive-board .ib-box > h2 {
@@ -1544,3 +1545,17 @@
 .ie-toolbar button:disabled .ie-arrow-forward {
   border-left-color: #999;
 }
+
+/* The browser shell is always light. Dark photographs and story scenes keep
+   their own colours; no preference or previous ending can recolour the chrome. */
+.archive-board { color-scheme: only light; background: #eae6d8; }
+.retro-avatar-button canvas {
+  display: block;
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  image-rendering: pixelated;
+}
+canvas.retro-profile-avatar { height: auto; image-rendering: pixelated; }
+@media (max-width: 850px) { .retro-avatar-button canvas { height: 130px; } }
+@media (max-width: 520px) { .retro-avatar-button canvas { height: 115px; } }

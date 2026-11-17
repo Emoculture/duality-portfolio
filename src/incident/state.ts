@@ -84,6 +84,12 @@ export function loadIncident(): IncidentSave {
 }
 export function saveIncident(s: IncidentSave) {
   volatileSave = copy(s);
+  // saveIncident is called from React state updaters; notify after rendering.
+  if (typeof window !== "undefined") {
+    queueMicrotask(() =>
+      window.dispatchEvent(new Event("duality:incident-progress")),
+    );
+  }
   try {
     localStorage.setItem(KEY, JSON.stringify(s));
   } catch {
@@ -112,4 +118,19 @@ export function chapter(s: IncidentSave) {
   let n = 0;
   while (n < steps.length && s.clues.includes(steps[n])) n++;
   return n;
+}
+
+// A primitive snapshot lets ARCHIVE update its portrait without persisting a
+// second, potentially stale copy of chapter progress.
+export function avatarStage(): number {
+  return Math.min(7, chapter(loadIncident()) + 1);
+}
+
+export function subscribeAvatarStage(onChange: () => void): () => void {
+  window.addEventListener("duality:incident-progress", onChange);
+  window.addEventListener("storage", onChange);
+  return () => {
+    window.removeEventListener("duality:incident-progress", onChange);
+    window.removeEventListener("storage", onChange);
+  };
 }
