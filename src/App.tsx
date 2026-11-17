@@ -4,12 +4,12 @@ import Portfolio from "./components/Portfolio";
 import Game from "./components/Game";
 import Archive from "./components/Archive";
 import ArchiveConnection from "./components/ArchiveConnection";
-import { avatarStage, loadIncident } from "./incident/state";
+import { add, avatarStage, loadIncident, saveIncident } from "./incident/state";
 import { load, save, type Mode } from "./state";
 export default function App() {
   const [state, setState] = useState(load);
   const [transition, setTransition] = useState(false);
-  const [connection, setConnection] = useState<{ returning: boolean; stage: number } | null>(null);
+  const [connection, setConnection] = useState<{ returning: boolean; stage: number; frame: "empty" | "occupied" | null } | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     save(state);
@@ -21,7 +21,19 @@ export default function App() {
     },
     [],
   );
+  useEffect(() => {
+    if (!connection) return;
+    const fallback = window.setTimeout(() => setConnection(null), 11000);
+    return () => window.clearTimeout(fallback);
+  }, [connection]);
+  const startConnection = useCallback(() => {
+    const incident = loadIncident();
+    const frame = incident.endings.length ? (incident.memory.events.includes("connection-last-frame") ? "occupied" : "empty") : null;
+    if (frame) saveIncident({ ...incident, memory: { ...incident.memory, events: add(incident.memory.events, "connection-last-frame") } });
+    setConnection({ returning: incident.memory.visits > 0 || incident.visited.length > 0, stage: avatarStage(), frame });
+  }, []);
   const go = useCallback((mode: Mode) => {
+    if (mode === "archive" && loadIncident().endings.length) startConnection();
     setState((s) => ({ ...s, mode }));
     window.scrollTo({ top: 0, behavior: "instant" });
     requestAnimationFrame(() => {
@@ -33,11 +45,12 @@ export default function App() {
         heading.focus({ preventScroll: true });
       }
     });
-  }, []);
+  }, [startConnection]);
   function secret() {
     if (transition) return;
     setTransition(true);
     timer.current = setTimeout(() => {
+      if (state.unlocked && loadIncident().endings.length) startConnection();
       setState((s) => ({
         ...s,
         discovered: true,
@@ -48,8 +61,7 @@ export default function App() {
     }, 650);
   }
   const win = useCallback(() => {
-    const incident = loadIncident();
-    setConnection({ returning: incident.memory.visits > 0 || incident.visited.length > 0, stage: avatarStage() });
+    startConnection();
     setState((s) => ({
       ...s,
       unlocked: true,
@@ -57,7 +69,7 @@ export default function App() {
       mode: "archive",
     }));
     window.scrollTo({ top: 0, behavior: "instant" });
-  }, []);
+  }, [startConnection]);
   const reduce = () => setState((s) => ({ ...s, reduced: !s.reduced }));
   return (
     <div className={transition ? "app glitch-entry" : "app"}>
@@ -89,7 +101,7 @@ export default function App() {
           onPuzzle={() => setState((s) => ({ ...s, puzzle: true }))}
         />
       )}
-      {connection && <ArchiveConnection returning={connection.returning} stage={connection.stage} reduced={state.reduced} onComplete={() => setConnection(null)} />}
+      {connection && <ArchiveConnection returning={connection.returning} stage={connection.stage} frame={connection.frame} reduced={state.reduced} onComplete={() => setConnection(null)} />}
     </div>
   );
 }

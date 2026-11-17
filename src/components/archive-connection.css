@@ -9,6 +9,7 @@
 .connection-progress { height: 20px; border: 2px inset #eee; background: #eeeee2; }
 .connection-progress span { display: block; height: 100%; background: #365f42; }
 .connection-face { position: absolute; width: min(180px, 40%); height: 180px; object-fit: cover; top: 30%; right: 5%; opacity: .27; image-rendering: pixelated; pointer-events: none; }
+.connection-last-frame { position: absolute; z-index: 2; top: 34%; right: 5%; width: min(240px, 60%); border: 1px solid #667b65; image-rendering: pixelated; }
 .connection-final { color: #d5dfcf; margin-top: 3em !important; }
 .connection-skip { position: relative; z-index: 3; padding: 10px 16px; border: 2px outset #c6c6bb; background: #c6c6bb; color: #141a14; font: inherit; cursor: pointer; }
 @media (prefers-reduced-motion: reduce) { .connection-screen::after { display: none; } }

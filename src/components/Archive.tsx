@@ -8,6 +8,8 @@ import Incident, { type View as IncidentView } from "../incident/Incident";
 import { avatarStage, loadIncident, recordArchiveVisit, remember, subscribeAvatarStage } from "../incident/state";
 import ArchivePortrait from "./ArchivePortrait";
 import ArchiveImage from "./ArchiveImage";
+import ArchiveObserver from "./ArchiveObserver";
+import SoundSetting from "./SoundSetting";
 import "../archive.css";
 const incidentDirectories: Record<IncidentView, string> = {
   journal: "journal", forum: "threads", recovery: "recovery", cctv: "cctv",
@@ -275,6 +277,7 @@ export default function Archive({
                 <button className="retro-button" onClick={onReplay}>
                   Пройти входную игру заново
                 </button>
+                <SoundSetting className="retro-button" />
                 <p>
                   Повторный вход сбросит допуск к архиву. Дополнительная находка
                   сохранится.
@@ -945,6 +948,7 @@ export default function Archive({
               · <button onClick={onExit}>В обычное портфолио</button>
             </p>
             <p>DUALITY ARCHIVE © 2004–???? · художественный архив</p>
+            <ArchiveObserver stage={portraitStage} />
             <p className="ib-fine">
               Все персонажи, даты и архивные события вымышлены. Изображения —
               авторские иллюстрации.

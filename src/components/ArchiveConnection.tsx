@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import ArchivePortrait from "./ArchivePortrait";
+import SoundSetting, { playArchiveClick } from "./SoundSetting";
 import "./archive-connection.css";
 
-export default function ArchiveConnection({ returning, stage, reduced, onComplete }: {
-  returning: boolean; stage: number; reduced: boolean; onComplete: () => void;
+export default function ArchiveConnection({ returning, stage, frame, reduced, onComplete }: {
+  returning: boolean; stage: number; frame: "empty" | "occupied" | null; reduced: boolean; onComplete: () => void;
 }) {
   const [elapsed, setElapsed] = useState(0);
   const complete = useRef(onComplete);
@@ -38,9 +39,13 @@ export default function ArchiveConnection({ returning, stage, reduced, onComplet
           </div>
           {elapsed >= 6000 && elapsed < 8350 && <div className="connection-window"><strong>RESTORING ARCHIVE MEMORY</strong><p>Последовательность воспроизведения: {progress}%</p><div className="connection-progress"><span style={{ width: `${progress}%` }} /></div></div>}
           {elapsed >= 6800 && elapsed < 7150 && <ArchivePortrait stage={stage} className="connection-face" alt="" />}
+          {frame && elapsed >= 7350 && elapsed < 8200 && <svg className="connection-last-frame" viewBox="0 0 240 140" role="img" aria-label={frame === "empty" ? "Пустое кресло перед компьютером" : "Неподвижный силуэт в кресле перед компьютером"}>
+            <rect width="240" height="140" fill="#141d17"/><path d="M0 110h240M35 110V30h170v80" fill="none" stroke="#4a5d4b"/><rect x="55" y="38" width="105" height="58" fill="#070b08" stroke="#81937c"/><text x="66" y="69" fill="#91b78b" fontSize="9">SESSION RESTORED</text><path d="M67 105h110M120 97v8M147 125h48M155 94v31h35V94" fill="none" stroke="#8d9686" strokeWidth="4"/>{frame === "occupied" && <path d="M165 88c-13-5-8-24 3-24s14 19 3 24c13 5 16 22 16 31h-39c0-12 3-26 17-31" fill="#090d0a" stroke="#506052"/>}
+          </svg>}
           {elapsed >= 8350 && <p className="connection-final">{returning ? "YOU WERE NOT SUPPOSED TO RETURN." : "A NEW SESSION HAS BEGUN."}<br />{returning ? "WELCOME BACK." : "WELCOME."}</p>}
         </>}
-        {elapsed >= 1000 && <button className="connection-skip" onClick={() => complete.current()}>Пропустить</button>}
+        <SoundSetting className="connection-skip" />{" "}
+        {elapsed >= 1000 && <button className="connection-skip" onClick={() => { playArchiveClick(); complete.current(); }}>Пропустить</button>}
       </div>
     </main>
   );

@@ -73,3 +73,90 @@ test("archive traces follow chapter progress without changing the light shell", 
   await expect(page.locator(".incident h2").first()).not.toHaveCSS("text-shadow", "none");
   await expect(page.getByRole("button", { name: "/journal/" })).toBeEnabled();
 });
+
+test("observer progresses once, and the fictional window records its choice", async ({ page }) => {
+  await page.clock.install();
+  await page.addInitScript(() => {
+    if (!localStorage.getItem("observer-seeded")) {
+      localStorage.setItem("observer-seeded", "yes");
+      localStorage.setItem("duality.v1", JSON.stringify({ mode: "archive", unlocked: true }));
+      localStorage.setItem("duality.incident.v1", JSON.stringify({ version: 1, clues: ["thread", "moderator", "image"], memory: { evidence: ["camera000"] } }));
+    }
+  });
+  await page.goto("/");
+  await expect(page.locator(".archive-observer")).toContainText("OBSERVER STATUS: ACTIVE");
+  await page.locator(".observer-window").getByRole("button", { name: "WAIT" }).click();
+  await expect(page.locator(".archive-observer")).toContainText("Я ждал ответа");
+  await page.clock.fastForward(9000);
+  await expect(page.locator(".archive-observer")).toContainText("OBSERVER STATUS: OBSERVED");
+  await expect(page.locator(".archive-observer")).toContainText("THERE ARE TWO OF YOU.");
+  await page.reload();
+  await expect(page.locator(".archive-observer")).toContainText("OBSERVER STATUS: OBSERVED");
+  await expect(page.locator(".observer-window")).toHaveCount(0);
+  await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
+  await expect(page.locator(".incident-journal")).toContainText("ARCHIVE.EXE: ожидание");
+});
+
+test("first and later post-ending connection show different fictional frames", async ({ page }) => {
+  await page.clock.install();
+  await page.addInitScript(() => {
+    if (!localStorage.getItem("frame-seeded")) {
+      localStorage.setItem("frame-seeded", "yes");
+      localStorage.setItem("duality.v1", JSON.stringify({ mode: "game", discovered: true }));
+      localStorage.setItem("duality.incident.v1", JSON.stringify({ version: 1, endings: ["RELEASE"], clues: ["thread"], memory: { visits: 1 } }));
+    }
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: /ACCESS.EXE/ }).click();
+  await page.getByLabel("Ключ доступа").fill("ECHO-04-17");
+  await page.getByRole("button", { name: "Открыть архив" }).click();
+  await page.clock.fastForward(1500);
+  await page.clock.fastForward(7500);
+  await expect(page.getByRole("img", { name: "Пустое кресло перед компьютером" })).toBeVisible();
+  await page.getByRole("button", { name: "Пропустить" }).click();
+  await page.getByRole("button", { name: "Завершить сеанс", exact: true }).click();
+  await page.getByRole("button", { name: "Вернуться в архив" }).click();
+  await page.clock.fastForward(7500);
+  await expect(page.getByRole("img", { name: "Неподвижный силуэт в кресле перед компьютером" })).toBeVisible();
+  await page.getByRole("button", { name: "Пропустить" }).click();
+  await expect(page.locator(".archive-board")).toBeVisible();
+});
+
+test("sound is off by default and the preference persists", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("duality.v1", JSON.stringify({ mode: "archive", unlocked: true })));
+  await page.goto("/");
+  await page.getByRole("button", { name: "Настройки", exact: true }).click();
+  const sound = page.getByRole("button", { name: /Звук эффектов/ });
+  await expect(sound).toHaveText("Звук эффектов: выключен");
+  await sound.click();
+  await expect(sound).toHaveText("Звук эффектов: включён");
+  await page.reload();
+  await page.getByRole("button", { name: "Настройки", exact: true }).click();
+  await expect(sound).toHaveText("Звук эффектов: включён");
+  await sound.click();
+  await expect(sound).toHaveText("Звук эффектов: выключен");
+});
+
+test("observer stays hidden in early chapters and TERMINATE is remembered", async ({ page }) => {
+  await page.addInitScript(() => {
+    if (!localStorage.getItem("terminate-seeded")) {
+      localStorage.setItem("terminate-seeded", "yes");
+      localStorage.setItem("duality.v1", JSON.stringify({ mode: "archive", unlocked: true }));
+      localStorage.setItem("duality.incident.v1", JSON.stringify({ version: 1, clues: [] }));
+    }
+  });
+  await page.goto("/");
+  await expect(page.locator(".archive-observer")).toHaveCount(0);
+  await page.evaluate(() => {
+    const save = JSON.parse(localStorage.getItem("duality.incident.v1")!);
+    save.clues = ["thread", "moderator", "image"];
+    localStorage.setItem("duality.incident.v1", JSON.stringify(save));
+  });
+  await page.reload();
+  await page.getByRole("button", { name: "TERMINATE" }).click();
+  await expect(page.locator(".archive-observer")).toContainText("попытка закрытия записана");
+  await page.reload();
+  await expect(page.locator(".observer-window")).toHaveCount(0);
+  await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
+  await expect(page.locator(".incident-journal")).toContainText("попытка закрытия окна");
+});

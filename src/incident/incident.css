@@ -89,6 +89,9 @@
 .archive-board[data-incident-stage="6"] .memory-messenger::after,
 .archive-board[data-incident-stage="7"] .memory-messenger::after { content: "▚ ▖ ▚ / signal fragment"; color: #71504b; font: 10px "Courier New", monospace; }
 .archive-board[data-incident-stage="7"] .incident-panel { border-right: 2px dashed #aea095; }
+.archive-observer { font: 11px/1.4 "Courier New", monospace; color: #5d3734; }
+.observer-window { max-width: 330px; margin: 8px 0; padding: 8px; color: #111; background: #c4c4bb; border: 2px outset #eee; }
+.observer-window button { padding: 5px 12px; border: 2px outset #eee; background: #d4d4cb; color: #111; }
 .incident-panel pre {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
