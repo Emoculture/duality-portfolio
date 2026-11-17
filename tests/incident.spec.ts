@@ -173,6 +173,18 @@ test("recovery puzzles, three hints, four versions and audio recordings", async 
     await page.getByRole("button", { name: new RegExp("^" + year) }).click();
     await expect(page.locator(".history-version")).toContainText(year);
   }
+  await page.getByRole("button", { name: "/cctv/" }).click();
+  for (const camera of ["CAM_01", "CAM_02", "CAM_03", "CAM_04"]) {
+    await page.getByLabel("Камера").selectOption(camera);
+    await expect(
+      page.getByRole("img", {
+        name: new RegExp(camera + " — архивный неподвижный кадр"),
+      }),
+    ).toBeVisible();
+  }
+  await expect(
+    page.getByText(/отсутствует на сохранившемся плане/),
+  ).toBeVisible();
   await page.getByRole("button", { name: "/recovery/" }).click();
   const log = page
     .locator("article")

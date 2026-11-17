@@ -554,6 +554,9 @@ export default function Incident({
               {cam} / {time} / 17.04.2004
             </span>
           </div>
+          {cam === "CAM_04" && (
+            <p>Помещение на кадре отсутствует на сохранившемся плане здания.</p>
+          )}
           <button onClick={() => setZoom(!zoom)} aria-pressed={zoom}>
             {zoom ? "Уменьшить" : "Увеличить"}
           </button>
