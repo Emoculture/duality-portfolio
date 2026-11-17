@@ -160,3 +160,13 @@ test("observer stays hidden in early chapters and TERMINATE is remembered", asyn
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
   await expect(page.locator(".incident-journal")).toContainText("попытка закрытия окна");
 });
+
+test("a connection rendering error falls through to the unlocked archive", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("duality.v1", JSON.stringify({ mode: "game" })));
+  await page.goto("/");
+  await page.getByRole("button", { name: /ACCESS.EXE/ }).click();
+  await page.getByLabel("Ключ доступа").fill("ECHO-04-17");
+  await page.evaluate(() => { window.matchMedia = () => { throw new Error("simulated cinematic failure"); }; });
+  await page.getByRole("button", { name: "Открыть архив" }).click();
+  await expect(page.locator(".archive-board")).toBeVisible();
+});

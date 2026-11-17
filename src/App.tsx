@@ -4,6 +4,7 @@ import Portfolio from "./components/Portfolio";
 import Game from "./components/Game";
 import Archive from "./components/Archive";
 import ArchiveConnection from "./components/ArchiveConnection";
+import ConnectionBoundary from "./components/ConnectionBoundary";
 import { add, avatarStage, loadIncident, saveIncident } from "./incident/state";
 import { load, save, type Mode } from "./state";
 export default function App() {
@@ -101,7 +102,7 @@ export default function App() {
           onPuzzle={() => setState((s) => ({ ...s, puzzle: true }))}
         />
       )}
-      {connection && <ArchiveConnection returning={connection.returning} stage={connection.stage} frame={connection.frame} reduced={state.reduced} onComplete={() => setConnection(null)} />}
+      {connection && <ConnectionBoundary onFailure={() => setConnection(null)}><ArchiveConnection returning={connection.returning} stage={connection.stage} frame={connection.frame} reduced={state.reduced} onComplete={() => setConnection(null)} /></ConnectionBoundary>}
     </div>
   );
 }
