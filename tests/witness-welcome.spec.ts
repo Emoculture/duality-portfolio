@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { enterSavedArchive } from "./navigation";
 
 for (const previousMode of ["normal", "game", "archive"] as const) {
   test(`document reload starts at welcome and preserves ${previousMode} progress`, async ({ page }) => {
@@ -43,4 +44,33 @@ test("unlocked visitor returns through connection without losing clues", async (
   await expect(page.locator(".connection-screen")).toBeVisible();
   await page.getByRole("button", { name: "Пропустить запись" }).click();
   await expect(page.locator(".archive-board")).toHaveAttribute("data-incident-stage", "3");
+});
+
+test("recordings trigger from case progress and can be replayed without changing it", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.addInitScript(() => {
+    if (!localStorage.getItem("witness-recordings-seeded")) {
+      localStorage.setItem("witness-recordings-seeded", "yes");
+      localStorage.setItem("duality.v1", JSON.stringify({ unlocked: true, discovered: true, reduced: true }));
+      localStorage.setItem("duality.incident.v1", JSON.stringify({ version: 1, clues: ["thread", "moderator", "image", "camera", "system", "dialogue", "finalkey"], endings: ["RELEASE"], memory: { recovered: ["LETTER", "CASE_LOG"], events: ["recording:first", "null-complete"] } }));
+    }
+  });
+  await page.goto("/");
+  await enterSavedArchive(page);
+  await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
+  const nav = page.getByRole("navigation", { name: "Разделы INCIDENT 000" });
+  for (const [section, title] of [["/recovery/", "THE RECORDING"], ["/user_000/", "TWO USERS"], ["/ending/", "FINAL MEMORY"]]) {
+    await nav.getByRole("button", { name: section, exact: true }).click();
+    await expect(page.locator(".pixel-cutscene")).toContainText(title);
+    await page.getByRole("button", { name: "Пропустить запись" }).click();
+  }
+  await nav.getByRole("button", { name: "/journal/" }).click();
+  const journal = page.getByRole("region", { name: "Журнал записей" });
+  const before = await page.evaluate(() => JSON.parse(localStorage.getItem("duality.incident.v1")!).memory.events);
+  await journal.getByRole("button", { name: "REC_0001 — FIRST CONTACT" }).click();
+  await expect(page.locator(".witness-sprite")).toHaveAttribute("src", "/archive/witness/witness-master.png");
+  for (let i = 0; i < 3; i++) await page.getByRole("button", { name: "Далее" }).click();
+  await expect(page.locator(".pixel-cutscene")).toContainText("THIS RECORDING WAS MADE TOMORROW.");
+  await page.getByRole("button", { name: "Завершить запись" }).click();
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem("duality.incident.v1")!).memory.events)).toEqual(before);
 });

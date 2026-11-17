@@ -100,6 +100,7 @@ test("additional photo, log and transcript recover with clues and survive reload
   await files.getByRole("button", { name: "Восстановить фотографию" }).click();
   await files.getByLabel("Порядок событий").fill("2004-2007");
   await files.getByRole("button", { name: "Восстановить журнал" }).click();
+  await page.getByRole("button", { name: "Пропустить запись" }).click();
   await files.getByLabel("Слово расшифровки").fill("TRACE");
   await files.getByRole("button", { name: "Восстановить расшифровку" }).click();
   await expect(files).toContainText("VOICE_2007.TXT — RECOVERED");
@@ -225,6 +226,7 @@ test("NULL choices, timer and ADMIN_1999 persist", async ({ page }) => {
   const messenger = page.getByRole("region", { name: "Переписка с NULL" });
   await messenger.getByRole("button", { name: "Сначала докажи" }).click();
   await messenger.getByRole("button", { name: "Сохранить ответ NULL" }).click();
+  await page.getByRole("button", { name: "Пропустить запись" }).click();
   await page.reload();
   await enterSavedArchive(page);
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
@@ -251,6 +253,7 @@ test("secret ending requires the case evidence and survives a new run", async ({
   await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
   const nav = page.getByRole("navigation", { name: "Разделы INCIDENT 000" });
   await nav.getByRole("button", { name: "/ending/" }).click();
+  await page.getByRole("button", { name: "Пропустить запись" }).click();
   await expect(page.getByRole("button", { name: "Запустить MEMORY PROTOCOL" })).toHaveCount(0);
   await nav.getByRole("button", { name: "/journal/" }).click();
   await page.getByRole("button", { name: "Сохранить противоречие" }).click();
@@ -357,9 +360,11 @@ test("complete new investigation is reachable through existing chapters", async 
   await expect(page.getByRole("region", { name: "Процедура восстановления памяти" })).toContainText("процедура завершена");
   await open("/user_000/");
   await page.getByRole("button", { name: "Сохранить ответ NULL" }).click();
+  await page.getByRole("button", { name: "Пропустить запись" }).click();
   await open("/ending/");
   await page.getByLabel("Последний ключ").fill("MEMORY-0001");
   await page.getByRole("button", { name: "Проверить ключ" }).click();
+  await page.getByRole("button", { name: "Пропустить запись" }).click();
   await page.getByRole("button", { name: "Запустить MEMORY PROTOCOL" }).click();
   await expect(page.locator(".incident-ending")).toContainText("MEMORY PROTOCOL");
 });

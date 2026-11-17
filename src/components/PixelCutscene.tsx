@@ -16,7 +16,7 @@ export default function PixelCutscene({ id, replay = false, completed = false, r
   const [failed, setFailed] = useState(false);
   const item = recordings[id];
   const text = line < item.lines.length ? item.lines[line] : item.end;
-  let short = reduced;
+  let short = reduced || document.documentElement.dataset.reduced === "true";
   try { short ||= typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { /* unavailable preference */ }
   useEffect(() => {
     setVisible(short ? text.length : 0);

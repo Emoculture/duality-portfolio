@@ -102,6 +102,7 @@ test("seven objectives, camera, terminal, choices and endings survive reload", a
   await page.getByRole("button", { name: "/ending/", exact: true }).click();
   await page.getByLabel("Последний ключ").fill("MEMORY-0001");
   await page.getByRole("button", { name: "Проверить ключ" }).click();
+  await page.getByRole("button", { name: "Пропустить запись" }).click();
   await page.getByRole("button", { name: "Удалить архив" }).click();
   await expect(page.getByText("1 FILE REMAINS")).toBeVisible();
   await page.getByRole("button", { name: "Домой", exact: true }).click();

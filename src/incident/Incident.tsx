@@ -13,6 +13,7 @@ import Desktop from "./Desktop";
 import History from "./History";
 import MemoryCase from "./MemoryCase";
 import MemoryProtocol from "./MemoryProtocol";
+import PixelCutscene, { recordings, type RecordingId } from "../components/PixelCutscene";
 import "./incident.css";
 export type View =
   | "journal"
@@ -102,6 +103,7 @@ export default function Incident({
   const [finalAnswer, setFinalAnswer] = useState("");
   const [reset, setReset] = useState(false);
   const [erase, setErase] = useState(false);
+  const [recording, setRecording] = useState<{ id: RecordingId; replay: boolean } | null>(null);
   useEffect(() => {
     if (initialView === "journal")
       update((s) => ({ ...s, visited: add(s.visited, "journal") }));
@@ -116,6 +118,13 @@ export default function Incident({
     }, Math.max(0, Math.min(2147483647, save.memory.timerDeadline - Date.now())));
     return () => window.clearTimeout(timer);
   }, [save.memory.timerDeadline, save.memory.events]);
+  useEffect(() => {
+    if (recording) return;
+    const pending: RecordingId | null = view === "recovery" && save.memory.recovered.includes("CASE_LOG") && !save.memory.events.includes("recording:recording") ? "recording"
+      : view === "dialogue" && save.memory.events.includes("null-complete") && !save.memory.events.includes("recording:two") ? "two"
+      : view === "decision" && save.clues.includes("finalkey") && !save.memory.events.includes("recording:final") ? "final" : null;
+    if (pending) setRecording({ id: pending, replay: false });
+  }, [view, save.memory.recovered, save.memory.events, save.clues, recording]);
   function changeView(next: View) {
     setView(next);
     onViewChange?.(next);
@@ -272,6 +281,13 @@ export default function Incident({
             </p>
             <MemoryCase view="journal" save={save} update={update} />
             <MemoryProtocol view="journal" save={save} update={update} />
+            <section className="incident-panel" aria-label="Журнал записей">
+              <h3>/recordings/</h3>
+              {(Object.keys(recordings) as RecordingId[]).map((id) => {
+                const seen = save.memory.events.includes(`recording:${id}`);
+                return <p key={id}><button disabled={!seen} onClick={() => setRecording({ id, replay: true })}>{recordings[id].title}</button>{seen ? " — просмотрено" : " — повреждено / заблокировано"}</p>;
+              })}
+            </section>
             {steps.map((s, i) => (
               <p key={s}>
                 [{save.clues.includes(s) ? "X" : " "}] {chapterNames[i]} —{" "}
@@ -883,6 +899,10 @@ export default function Incident({
           )}
         </div>
       )}
+      {recording && <PixelCutscene key={`${recording.id}-${recording.replay}`} id={recording.id} replay={recording.replay} completed={save.endings.length > 0} onComplete={() => {
+        if (!recording.replay) update((s) => ({ ...s, memory: { ...s.memory, events: add(s.memory.events, `recording:${recording.id}`) } }));
+        setRecording(null);
+      }} />}
     </section>
   );
 }
