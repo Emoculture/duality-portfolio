@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { add, loadIncident, saveIncident } from "./state";
 import type { DecayStage } from "./ArchiveDecayEngine";
+import { playArchiveClick } from "../components/SoundSetting";
 
 const messages = ["", "I REMEMBER YOU", "OBSERVER CONNECTED · USER COUNT: 2", "I CAN SEE THE FILE YOU OPENED · DISCONNECT DENIED", "YOU ARE NOT BROWSING THE ARCHIVE. THE ARCHIVE IS BROWSING YOU."];
 
@@ -33,7 +34,7 @@ export default function ArchiveAnomalyManager({ stage, reduced, onExitWarning }:
       <p>MEMORY SECTOR: DAMAGED</p><p>{messages[shown]}</p>
       {shown >= 2 && <span className="decay-fake-cursor" aria-hidden="true">➤</span>}
       {shown === 4 && <p>USER COUNT: {userCount}</p>}
-      <button onClick={() => { setShown(null); onExitWarning(false); }}>Пропустить сбой</button>
+      <button onClick={() => { playArchiveClick("error"); setShown(null); onExitWarning(false); }}>Пропустить сбой</button>
     </div>}
   </>;
 }

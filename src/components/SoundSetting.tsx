@@ -4,15 +4,15 @@ const KEY = "duality.sound.enabled";
 function enabled() {
   try { return localStorage.getItem(KEY) === "true"; } catch { return false; }
 }
-export function playArchiveClick() {
+export function playArchiveClick(kind: "click" | "open" | "close" | "error" = "click") {
   if (!enabled()) return;
   try {
     const audio = new AudioContext();
     const oscillator = audio.createOscillator();
     const gain = audio.createGain();
-    oscillator.type = "sine";
-    oscillator.frequency.value = 540;
-    gain.gain.setValueAtTime(0.025, audio.currentTime);
+    oscillator.type = kind === "error" ? "triangle" : "sine";
+    oscillator.frequency.value = { click: 540, open: 620, close: 390, error: 180 }[kind];
+    gain.gain.setValueAtTime(kind === "error" ? 0.015 : 0.025, audio.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.0001, audio.currentTime + 0.08);
     oscillator.connect(gain).connect(audio.destination);
     oscillator.start();

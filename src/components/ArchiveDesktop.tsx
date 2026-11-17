@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState, type PointerEvent, type React
 import { add, loadIncident, saveIncident } from "../incident/state";
 import type { ArchivePage } from "../archiveData";
 import type { DecayStage } from "../incident/ArchiveDecayEngine";
+import { playArchiveClick } from "./SoundSetting";
 import "./archive-desktop.css";
 
 type WindowName = "browser" | "navigator" | "memory" | "you";
@@ -24,6 +25,7 @@ export default function ArchiveDesktop({ children, stage, navigate, onExit }: { 
     setOrder((values) => [...values.filter((value) => value !== name), name]);
     setStart(false);
   }, []);
+  function launch(name: WindowName) { if (!open.includes(name)) playArchiveClick("open"); focus(name); }
   useEffect(() => {
     const changed = () => setFull(document.fullscreenElement === desktop.current);
     document.addEventListener("fullscreenchange", changed);
@@ -72,25 +74,25 @@ export default function ArchiveDesktop({ children, stage, navigate, onExit }: { 
   }
   function title(name: WindowName) {
     return <header className="archive-os-title" onPointerDown={(event) => down(event, name)} onPointerMove={move} onPointerUp={() => { dragging.current = null; }} onPointerCancel={() => { dragging.current = null; }}>
-      <span>{titles[name]}</span><button onClick={() => setOpen((values) => values.filter((value) => value !== name))} aria-label={`Закрыть окно ${titles[name]}`}>×</button>
+      <span>{titles[name]}</span><button onClick={() => { playArchiveClick("close"); setOpen((values) => values.filter((value) => value !== name)); }} aria-label={`Закрыть окно ${titles[name]}`}>×</button>
     </header>;
   }
-  function openPage(page: ArchivePage) { navigate(page); focus("browser"); }
+  function openPage(page: ArchivePage) { navigate(page); launch("browser"); }
   function rememberYou() {
     const save = loadIncident();
     if (!save.memory.events.includes("decay-found:you")) saveIncident({ ...save, memory: { ...save.memory, events: add(save.memory.events, "decay-found:you") } });
   }
   function openYou() {
     rememberYou();
-    focus("you");
+    launch("you");
   }
   const progress = loadIncident();
   return <div className="archive-os" data-os-decay={stage} ref={desktop}>
     <div className="archive-os-controls"><button onClick={fullscreen}>{full ? "⛶ EXIT FULLSCREEN" : "⛶ FULLSCREEN"}</button>{error && <span role="status">{error}</span>}</div>
     <nav className="archive-os-icons" aria-label="Рабочий стол ARCHIVE_OS">
       {links.map(([label, page]) => <button key={page} onClick={() => openPage(page)}><span aria-hidden="true">▣</span>{label}</button>)}
-      <button onClick={() => focus("navigator")}><span aria-hidden="true">▤</span>Проводник</button>
-      <button onClick={() => focus("memory")}><span aria-hidden="true">▧</span>MEMORY.LOG</button>
+      <button onClick={() => launch("navigator")}><span aria-hidden="true">▤</span>Проводник</button>
+      <button onClick={() => launch("memory")}><span aria-hidden="true">▧</span>MEMORY.LOG</button>
     </nav>
     <section className="archive-os-browser" aria-label="Окно архива" hidden={!open.includes("browser")} onPointerDown={() => focus("browser")} style={{ left: positions.browser.x, top: positions.browser.y, zIndex: 10 + order.indexOf("browser") }}>
       {title("browser")}{children}
@@ -105,6 +107,6 @@ export default function ArchiveDesktop({ children, stage, navigate, onExit }: { 
       {title("you")}<div className="archive-os-body"><p>YOU / неопознанная архивная запись</p><p>Источник неизвестен. Это вымышленный файл; сведения о посетителе не используются.</p><p>«Копия ответила раньше, чем её открыли».</p></div>
     </section>}
     {stage >= 3 && <details className="archive-os-mobile-you" onToggle={(event) => { if (event.currentTarget.open) rememberYou(); }}><summary>▧ YOU / неопознанная запись</summary><p>«Копия ответила раньше, чем её открыли». Содержимое вымышлено и не использует сведения о посетителе.</p></details>}
-    <footer className="archive-os-taskbar"><button onClick={() => setStart(!start)} aria-expanded={start}>▦ ARCHIVE_OS</button>{open.map((name) => <button key={name} onClick={() => focus(name)} aria-pressed={order.at(-1) === name}>{titles[name]}</button>)}<button onClick={onExit} aria-label="Выход из ARCHIVE_OS">ВЫХОД</button><span className="archive-os-clock" aria-label="Индикатор звука">{sound ? "♪ ON" : "♪ OFF"}</span><span className="archive-os-clock">SYS · {stage === 4 ? `00:${String(59 - clock).padStart(2, "0")}` : `00:${String(clock).padStart(2, "0")}`}</span>{start && <div className="archive-os-start"><button onClick={() => focus("browser")}>ARCHIVE.EXE</button><button onClick={() => focus("navigator")}>Проводник</button><button onClick={() => focus("memory")}>MEMORY.LOG</button></div>}</footer>
+    <footer className="archive-os-taskbar"><button onClick={() => setStart(!start)} aria-expanded={start}>▦ ARCHIVE_OS</button>{open.map((name) => <button key={name} onClick={() => focus(name)} aria-pressed={order.at(-1) === name}>{titles[name]}</button>)}<button onClick={onExit} aria-label="Выход из ARCHIVE_OS">ВЫХОД</button><span className="archive-os-clock" aria-label="Индикатор звука">{sound ? "♪ ON" : "♪ OFF"}</span><span className="archive-os-clock">SYS · {stage === 4 ? `00:${String(59 - clock).padStart(2, "0")}` : `00:${String(clock).padStart(2, "0")}`}</span>{start && <div className="archive-os-start"><button onClick={() => launch("browser")}>ARCHIVE.EXE</button><button onClick={() => launch("navigator")}>Проводник</button><button onClick={() => launch("memory")}>MEMORY.LOG</button></div>}</footer>
   </div>;
 }

@@ -87,3 +87,29 @@ test("late-stage YOU file is accessible on desktop and phone and remembered", as
   }
   await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem("duality.incident.v1")!).memory.events)).toContain("decay-found:you");
 });
+
+test("window sounds require opt-in and play only on user actions", async ({ page }, info) => {
+  test.skip(info.project.name !== "desktop", "Desktop window controls are hidden on phones.");
+  await page.addInitScript(() => {
+    const frequencies: number[] = [];
+    Object.assign(window, { __testFrequencies: frequencies });
+    class FakeAudio {
+      currentTime = 0;
+      createOscillator() { return { type: "", frequency: { set value(v: number) { frequencies.push(v); } }, connect() { return { connect() {} }; }, start() {}, stop() {}, onended: null }; }
+      createGain() { return { gain: { setValueAtTime() {}, exponentialRampToValueAtTime() {} } }; }
+      close() { return Promise.resolve(); }
+    }
+    Object.defineProperty(window, "AudioContext", { value: FakeAudio });
+  });
+  await open(page);
+  const icons = page.getByRole("navigation", { name: "Рабочий стол ARCHIVE_OS" });
+  await icons.getByRole("button", { name: "Проводник" }).click();
+  await page.getByRole("button", { name: "Закрыть окно Проводник" }).click();
+  expect(await page.evaluate(() => (window as unknown as { __testFrequencies: number[] }).__testFrequencies)).toEqual([]);
+  await page.getByRole("button", { name: "Настройки", exact: true }).click();
+  await page.getByRole("button", { name: "Звук эффектов: выключен" }).click();
+  await page.evaluate(() => { (window as unknown as { __testFrequencies: number[] }).__testFrequencies.length = 0; });
+  await icons.getByRole("button", { name: "Проводник" }).click();
+  await page.getByRole("button", { name: "Закрыть окно Проводник" }).click();
+  expect(await page.evaluate(() => (window as unknown as { __testFrequencies: number[] }).__testFrequencies)).toEqual([620, 390]);
+});
