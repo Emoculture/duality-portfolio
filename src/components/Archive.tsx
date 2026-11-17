@@ -12,6 +12,7 @@ import ArchiveObserver from "./ArchiveObserver";
 import SoundSetting from "./SoundSetting";
 import { currentDecayStage } from "../incident/ArchiveDecayEngine";
 import ArchiveAnomalyManager from "../incident/ArchiveAnomalyManager";
+import ArchiveDesktop from "./ArchiveDesktop";
 import "../archive.css";
 import "../incident/ArchiveDecayTheme.css";
 const incidentDirectories: Record<IncidentView, string> = {
@@ -164,6 +165,7 @@ export default function Archive({
       data-incident-stage={portraitStage}
       data-decay-stage={decayStage}
     >
+      <ArchiveDesktop stage={decayStage} navigate={navigate}>
       <a className="skip-link" href="#archive-main">
         К содержимому
       </a>
@@ -965,6 +967,7 @@ export default function Archive({
         </div>
       )}
       <ArchiveImage image={attachment} onClose={() => setAttachment(null)} />
+      </ArchiveDesktop>
     </div>
   );
 }

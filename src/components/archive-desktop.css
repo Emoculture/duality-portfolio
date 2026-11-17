@@ -1,0 +1,31 @@
+.archive-os { position: relative; min-height: 100svh; padding: 42px 8px 54px 115px; background: repeating-linear-gradient(45deg, #a8b5a0 0 2px, #a3b09b 2px 4px); color: #111; }
+.archive-os:fullscreen { overflow: auto; }
+.archive-os-controls { position: absolute; right: 10px; top: 7px; z-index: 40; color: #111; }
+.archive-os-controls button, .archive-os-taskbar button, .archive-os-title button, .archive-os-body button { border: 2px outset #eee; border-radius: 0; background: #c9ccc1; color: #111; padding: 5px 8px; font: 12px Tahoma, Arial, sans-serif; }
+.archive-os-controls span { display: block; max-width: 300px; padding: 4px; background: #ecece0; }
+.archive-os-icons { position: absolute; top: 44px; left: 4px; width: 105px; display: grid; gap: 4px; }
+.archive-os-icons button { min-height: 46px; border: 0; background: transparent; color: #19251b; font: 11px Tahoma, Arial, sans-serif; overflow-wrap: anywhere; }
+.archive-os-icons button span { display: block; font-size: 20px; }
+.archive-os-browser { position: relative; border: 3px outset #eee; background: #c4c4bb; min-width: 0; }
+.archive-os-browser[hidden] { display: none; }
+.archive-os-title { display: flex; justify-content: space-between; align-items: center; background: #162b66; color: #fff; padding: 3px 5px; font: bold 12px Tahoma, Arial, sans-serif; touch-action: none; cursor: move; }
+.archive-os-title button { padding: 0 5px; }
+.archive-os-window { position: fixed; width: min(360px, calc(100vw - 20px)); border: 3px outset #eee; background: #c4c4bb; color: #111; box-shadow: 2px 3px #0008; }
+.archive-os-body { padding: 10px; background: #ecece0; color: #111; }
+.archive-os-body button { display: block; width: 100%; text-align: left; }
+.archive-os-taskbar { position: fixed; z-index: 80; bottom: 0; left: 0; right: 0; display: flex; gap: 4px; align-items: center; min-height: 38px; padding: 3px; border-top: 2px outset #eee; background: #bfc3b8; color: #111; }
+.archive-os-clock { padding: 5px; border: 2px inset #eee; white-space: nowrap; font: 11px "Courier New", monospace; }
+.archive-os-clock[aria-label] { margin-left: auto; }
+.archive-os-start { position: absolute; bottom: 100%; left: 0; display: grid; background: #c9ccc1; border: 2px outset #eee; }
+body:has(.pixel-cutscene) .archive-os-taskbar { visibility: hidden; }
+.archive-os[data-os-decay="2"] { background: repeating-linear-gradient(45deg, #6a7968 0 2px, #64725f 2px 4px); }
+.archive-os[data-os-decay="3"], .archive-os[data-os-decay="4"] { background: repeating-linear-gradient(45deg, #29352c 0 2px, #222e25 2px 4px); }
+.archive-os[data-os-decay="4"] { background: repeating-linear-gradient(45deg, #0d1610 0 2px, #152117 2px 4px); }
+.archive-os[data-os-decay="3"] .archive-os-icons button, .archive-os[data-os-decay="4"] .archive-os-icons button { color: #d7e5cf; }
+.archive-os[data-os-decay="3"] .archive-os-taskbar, .archive-os[data-os-decay="4"] .archive-os-taskbar { background: #485147; }
+@media (max-width: 760px) {
+  .archive-os { padding: 38px 0 0; background: transparent !important; }
+  .archive-os-icons, .archive-os-taskbar, .archive-os-browser > .archive-os-title, .archive-os-window { display: none; }
+  .archive-os-browser { left: 0 !important; top: 0 !important; border: 0; }
+  .archive-os-controls { top: 3px; right: 4px; }
+}
