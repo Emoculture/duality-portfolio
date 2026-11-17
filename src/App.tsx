@@ -3,10 +3,13 @@ import Welcome from "./components/Welcome";
 import Portfolio from "./components/Portfolio";
 import Game from "./components/Game";
 import Archive from "./components/Archive";
+import ArchiveConnection from "./components/ArchiveConnection";
+import { avatarStage, loadIncident } from "./incident/state";
 import { load, save, type Mode } from "./state";
 export default function App() {
   const [state, setState] = useState(load);
   const [transition, setTransition] = useState(false);
+  const [connection, setConnection] = useState<{ returning: boolean; stage: number } | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     save(state);
@@ -45,6 +48,8 @@ export default function App() {
     }, 650);
   }
   const win = useCallback(() => {
+    const incident = loadIncident();
+    setConnection({ returning: incident.memory.visits > 0 || incident.visited.length > 0, stage: avatarStage() });
     setState((s) => ({
       ...s,
       unlocked: true,
@@ -71,7 +76,7 @@ export default function App() {
       {state.mode === "game" && (
         <Game onExit={() => go("normal")} onWin={win} />
       )}{" "}
-      {state.mode === "archive" && (
+      {state.mode === "archive" && !connection && (
         <Archive
           onExit={() => go("normal")}
           onReplay={() => {
@@ -84,6 +89,7 @@ export default function App() {
           onPuzzle={() => setState((s) => ({ ...s, puzzle: true }))}
         />
       )}
+      {connection && <ArchiveConnection returning={connection.returning} stage={connection.stage} reduced={state.reduced} onComplete={() => setConnection(null)} />}
     </div>
   );
 }

@@ -9,6 +9,7 @@ async function win(page: Page) {
   await page.getByLabel("Ключ доступа").fill("echo-04-17");
   await page.getByRole("button", { name: "Открыть архив" }).click();
   await expect(page.getByText("ACCESS GRANTED", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Пропустить" }).click();
   await expect(
     page.getByRole("heading", { name: "Вы нашли другую сторону." }),
   ).toBeVisible();
