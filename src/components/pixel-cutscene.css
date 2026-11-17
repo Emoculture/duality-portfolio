@@ -1,0 +1,10 @@
+.pixel-cutscene { position: fixed; z-index: 10000; inset: 0; overflow: auto; min-height: 100dvh; padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); background: #080b09; color: #d6dfcc; font: 15px/1.5 "Courier New", monospace; }
+.pixel-room { position: relative; min-height: calc(100dvh - 24px); max-width: 850px; margin: auto; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; background: linear-gradient(90deg, #101611, #252d22 50%, #0e110f); border: 2px ridge #65705f; }
+.pixel-room::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(transparent 0 3px, #0004 4px); opacity: .25; }
+.pixel-time { position: absolute; top: 8px; left: 12px; z-index: 2; font-size: 11px; color: #a8b49f; }
+.witness-sprite { position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%); width: min(70vw, 470px); max-height: 65%; object-fit: contain; object-position: bottom; image-rendering: pixelated; }
+.pixel-dialogue { position: relative; z-index: 3; margin: 12px; padding: 12px; min-height: 150px; border: 2px outset #999e8e; background: #171d18; }
+.pixel-dialogue p { min-height: 3em; margin: 5px 0; }
+.pixel-dialogue button { min-height: 44px; padding: 8px 12px; border: 2px outset #d4d3c8; border-radius: 0; background: #c4c5b9; color: #171c16; font: inherit; }
+.pixel-anomaly { position: absolute; top: 14%; left: 8%; z-index: 2; color: #d2d9c9; }
+@media (prefers-reduced-motion: reduce) { .pixel-room::after { display: none; } }

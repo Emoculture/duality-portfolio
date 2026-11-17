@@ -41,5 +41,6 @@ test("unlocked visitor returns through connection without losing clues", async (
   await page.goto("/");
   await page.getByRole("button", { name: "Неизвестный объект" }).click();
   await expect(page.locator(".connection-screen")).toBeVisible();
+  await page.getByRole("button", { name: "Пропустить запись" }).click();
   await expect(page.locator(".archive-board")).toHaveAttribute("data-incident-stage", "3");
 });

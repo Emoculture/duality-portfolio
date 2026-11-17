@@ -462,6 +462,7 @@ test("incident remains usable across archive pages when storage is denied", asyn
   await page.getByLabel("Ключ доступа").fill("ECHO-04-17");
   await page.getByRole("button", { name: "Открыть архив" }).click();
   await page.getByRole("button", { name: "Пропустить" }).click();
+  await page.getByRole("button", { name: "Пропустить запись" }).click();
   await expect(
     page.getByRole("heading", { name: "Вы нашли другую сторону." }),
   ).toBeVisible();

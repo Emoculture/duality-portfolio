@@ -11,6 +11,7 @@ async function win(page: Page) {
   await page.getByRole("button", { name: "Открыть архив" }).click();
   await expect(page.getByText("ACCESS GRANTED", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Пропустить" }).click();
+  await page.getByRole("button", { name: "Пропустить запись" }).click();
   await expect(
     page.getByRole("heading", { name: "Вы нашли другую сторону." }),
   ).toBeVisible();

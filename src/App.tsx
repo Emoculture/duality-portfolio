@@ -5,12 +5,14 @@ import Game from "./components/Game";
 import Archive from "./components/Archive";
 import ArchiveConnection from "./components/ArchiveConnection";
 import ConnectionBoundary from "./components/ConnectionBoundary";
+import PixelCutscene from "./components/PixelCutscene";
 import { add, avatarStage, loadIncident, saveIncident } from "./incident/state";
 import { load, save, type Mode } from "./state";
 export default function App() {
   const [state, setState] = useState(load);
   const [transition, setTransition] = useState(false);
   const [connection, setConnection] = useState<{ returning: boolean; stage: number; frame: "empty" | "occupied" | null } | null>(null);
+  const [firstContact, setFirstContact] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     save(state);
@@ -22,11 +24,15 @@ export default function App() {
     },
     [],
   );
+  const finishConnection = useCallback(() => {
+    setConnection(null);
+    if (!loadIncident().memory.events.includes("recording:first")) setFirstContact(true);
+  }, []);
   useEffect(() => {
     if (!connection) return;
-    const fallback = window.setTimeout(() => setConnection(null), 11000);
+    const fallback = window.setTimeout(finishConnection, 11000);
     return () => window.clearTimeout(fallback);
-  }, [connection]);
+  }, [connection, finishConnection]);
   const startConnection = useCallback(() => {
     const incident = loadIncident();
     const frame = incident.endings.length ? (incident.memory.events.includes("connection-last-frame") ? "occupied" : "empty") : null;
@@ -89,7 +95,7 @@ export default function App() {
       {state.mode === "game" && (
         <Game onExit={() => go("normal")} onWin={win} />
       )}{" "}
-      {state.mode === "archive" && !connection && (
+      {state.mode === "archive" && !connection && !firstContact && (
         <Archive
           onExit={() => go("normal")}
           onReplay={() => {
@@ -102,7 +108,12 @@ export default function App() {
           onPuzzle={() => setState((s) => ({ ...s, puzzle: true }))}
         />
       )}
-      {connection && <ConnectionBoundary onFailure={() => setConnection(null)}><ArchiveConnection returning={connection.returning} stage={connection.stage} frame={connection.frame} reduced={state.reduced} onComplete={() => setConnection(null)} /></ConnectionBoundary>}
+      {connection && <ConnectionBoundary onFailure={finishConnection}><ArchiveConnection returning={connection.returning} stage={connection.stage} frame={connection.frame} reduced={state.reduced} onComplete={finishConnection} /></ConnectionBoundary>}
+      {firstContact && <PixelCutscene id="first" reduced={state.reduced} onComplete={() => {
+        const latest = loadIncident();
+        saveIncident({ ...latest, memory: { ...latest.memory, events: add(latest.memory.events, "recording:first") } });
+        setFirstContact(false);
+      }} />}
     </div>
   );
 }

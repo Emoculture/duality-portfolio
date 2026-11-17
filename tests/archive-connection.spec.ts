@@ -20,6 +20,9 @@ test("wrong key stays in game; successful first connection finishes without loop
   await expect(sequence).toContainText("NEW MEMORY SIGNATURE DETECTED");
   await expect(sequence).not.toContainText("RESTORING SESSION...");
   await page.clock.fastForward(5000);
+  await expect(page.locator(".pixel-cutscene")).toBeVisible();
+  await expect(sequence).toHaveCount(0);
+  await page.getByRole("button", { name: "Пропустить запись" }).click();
   await expect(page.locator(".archive-board")).toBeVisible();
   await expect(sequence).toHaveCount(0);
   await page.reload();
@@ -47,6 +50,7 @@ test("returning player can skip connection without losing progress", async ({ pa
   await expect(sequence).toContainText("RESTORING SESSION...");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   await sequence.getByRole("button", { name: "Пропустить" }).click();
+  await page.getByRole("button", { name: "Пропустить запись" }).click();
   await expect(page.locator(".archive-board")).toHaveAttribute("data-incident-stage", "3");
 });
 
@@ -63,6 +67,7 @@ test("reduced motion uses a short static connection", async ({ page }) => {
   await page.clock.fastForward(1500);
   await expect(page.locator(".connection-short")).toBeVisible();
   await page.clock.fastForward(1500);
+  await page.getByRole("button", { name: "Пропустить запись" }).click();
   await expect(page.locator(".archive-board")).toHaveCSS("background-color", "rgb(234, 230, 216)");
 });
 
@@ -125,6 +130,7 @@ test("first and later post-ending connection show different fictional frames", a
   await page.clock.fastForward(7500);
   await expect(page.getByRole("img", { name: "Пустое кресло перед компьютером" })).toBeVisible();
   await page.getByRole("button", { name: "Пропустить" }).click();
+  await page.getByRole("button", { name: "Пропустить запись" }).click();
   await page.getByRole("button", { name: "Завершить сеанс", exact: true }).click();
   await page.getByRole("button", { name: "Вернуться в архив" }).click();
   await page.clock.fastForward(7500);
@@ -185,5 +191,6 @@ test("a connection rendering error falls through to the unlocked archive", async
   await page.getByLabel("Ключ доступа").fill("ECHO-04-17");
   await page.evaluate(() => { window.matchMedia = () => { throw new Error("simulated cinematic failure"); }; });
   await page.getByRole("button", { name: "Открыть архив" }).click();
+  await page.getByRole("button", { name: "Пропустить запись" }).click();
   await expect(page.locator(".archive-board")).toBeVisible();
 });

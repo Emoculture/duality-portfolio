@@ -9,5 +9,8 @@ export async function enterSavedArchive(page: Page) {
   const skip = page.getByRole("button", { name: "Пропустить" });
   await expect(archive.or(skip)).toBeVisible({ timeout: 15000 });
   if (await skip.isVisible()) await skip.click({ force: true, timeout: 1000 }).catch(() => {});
+  const recording = page.getByRole("button", { name: "Пропустить запись" });
+  await expect(archive.or(recording)).toBeVisible({ timeout: 15000 });
+  if (await recording.isVisible()) await recording.click();
   await expect(archive).toBeVisible();
 }
