@@ -77,3 +77,40 @@ test("forum changes, recovered letter and CAMERA_000 evidence survive reload", a
   await expect(dossier).toContainText("кадр 00:01 сохранён");
   await expect(dossier).toContainText("CHANGE.LOG");
 });
+
+test("NULL choices, timer and ADMIN_1999 persist", async ({ page }) => {
+  await page.addInitScript(() => {
+    if (!localStorage.getItem("interaction-seeded")) {
+      localStorage.setItem("interaction-seeded", "yes");
+      localStorage.setItem("duality.v1", JSON.stringify({ mode: "archive", unlocked: true, discovered: true }));
+      localStorage.setItem("duality.incident.v1", JSON.stringify({ version: 1, clues: ["thread", "moderator", "image"], memory: { recovered: ["LETTER"], evidence: ["camera000"] } }));
+    }
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
+  const procedure = page.getByRole("region", { name: "Процедура восстановления памяти" });
+  await procedure.getByRole("button", { name: "Запустить MIDNIGHT EVENT" }).click();
+  await expect(procedure).toContainText("До 00:00:");
+  await page.evaluate(() => {
+    const save = JSON.parse(localStorage.getItem("duality.incident.v1")!);
+    save.memory.timerDeadline = Date.now() - 1;
+    localStorage.setItem("duality.incident.v1", JSON.stringify(save));
+  });
+  await page.reload();
+  await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
+  await expect(procedure).toContainText("процедура завершена");
+  await procedure.getByLabel("Код ADMIN_1999").fill("TRACE-0001");
+  await procedure.getByRole("button", { name: "Проверить код" }).click();
+  await procedure.getByRole("button", { name: "Сохранить противоречие" }).click();
+  const nav = page.getByRole("navigation", { name: "Разделы INCIDENT 000" });
+  await nav.getByRole("button", { name: "/user_000/" }).click();
+  const messenger = page.getByRole("region", { name: "Переписка с NULL" });
+  await messenger.getByRole("button", { name: "Сначала докажи" }).click();
+  await messenger.getByRole("button", { name: "Сохранить ответ NULL" }).click();
+  await page.reload();
+  await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
+  await expect(procedure).toContainText("ДОСТУП ОТКРЫТ");
+  await nav.getByRole("button", { name: "/user_000/" }).click();
+  await expect(messenger).toContainText("Сначала докажи");
+  await expect(messenger).toContainText("Переписка сохранена");
+});

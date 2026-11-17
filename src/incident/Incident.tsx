@@ -12,6 +12,7 @@ import {
 import Desktop from "./Desktop";
 import History from "./History";
 import MemoryCase from "./MemoryCase";
+import MemoryProtocol from "./MemoryProtocol";
 import "./incident.css";
 export type View =
   | "journal"
@@ -108,6 +109,13 @@ export default function Incident({
   useEffect(() => {
     setView(initialView);
   }, [initialView]);
+  useEffect(() => {
+    if (save.memory.timerDeadline === null || save.memory.events.includes("midnight")) return;
+    const timer = window.setTimeout(() => {
+      update((s) => ({ ...s, memory: { ...s.memory, events: add(s.memory.events, "midnight"), evidence: add(s.memory.evidence, "midnight") } }));
+    }, Math.max(0, Math.min(2147483647, save.memory.timerDeadline - Date.now())));
+    return () => window.clearTimeout(timer);
+  }, [save.memory.timerDeadline, save.memory.events]);
   function changeView(next: View) {
     setView(next);
     onViewChange?.(next);
@@ -146,7 +154,7 @@ export default function Incident({
       choices: [],
       systemUnlocked: false,
       lastEnding: null,
-      memory: { ...s.memory, evidence: [], recovered: [], changes: [] },
+      memory: { ...s.memory, evidence: [], recovered: [], changes: [], nullChoices: [], timerDeadline: null, adminUnlocked: false, events: [] },
     }));
     setReset(false);
     setErase(false);
@@ -260,6 +268,7 @@ export default function Incident({
               {save.memory.visits > 1 && <> · Ты снова здесь.</>}
             </p>
             <MemoryCase view="journal" save={save} update={update} />
+            <MemoryProtocol view="journal" save={save} update={update} />
             {steps.map((s, i) => (
               <p key={s}>
                 [{save.clues.includes(s) ? "X" : " "}] {chapterNames[i]} —{" "}
@@ -687,6 +696,7 @@ export default function Incident({
       )}
       {view === "dialogue" && (
         <div className="incident-panel">
+          <MemoryProtocol view="dialogue" save={save} update={update} />
           <h3>Соединение с №000</h3>
           <p>№000: «{messages}»</p>
           {save.clues.includes("system") ? (

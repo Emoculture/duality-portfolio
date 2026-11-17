@@ -78,8 +78,9 @@ export default function MemoryCase({ view, save, update }: Props) {
         </select></label>
         <figure className={`memory-camera memory-camera-${frame.slice(-1)}`}>
           <img src="/archive/camera-unknown.svg" alt="Вымышленная комната в архиве камеры" />
-          <figcaption>CAMERA_000 / {frame} {frame === "00:02" ? "— ПОТЕРЯ СИГНАЛА" : frame === "00:01" ? "— ТЕНЬ У ДВЕРИ" : "— АРХИВНЫЙ КАДР"}</figcaption>
+          <figcaption>CAMERA_000 / {frame} {frame === "00:02" ? (memory.events.includes("midnight") ? "— СИГНАЛ ВОССТАНОВЛЕН: ДВЕРЬ ОТКРЫТА" : "— ПОТЕРЯ СИГНАЛА") : frame === "00:01" ? "— ТЕНЬ У ДВЕРИ" : "— АРХИВНЫЙ КАДР"}</figcaption>
         </figure>
+        {frame === "00:02" && memory.events.includes("midnight") && <p>Восстановленная запись противоречит журналу: дверь открыта до команды администратора.</p>}
         {frame === "00:01" && <><p>На кадре есть тень, но журнал камеры не содержит записи об открытии двери.</p><button onClick={() => collect("camera000")}>Сохранить кадр CAMERA_000</button></>}
         {memory.evidence.includes("camera000") && <p>Кадр сохранён в деле.</p>}
       </>}

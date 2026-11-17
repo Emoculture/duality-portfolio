@@ -7,6 +7,9 @@ export type ArchiveMemory = {
   evidence: string[];
   recovered: string[];
   changes: string[];
+  nullChoices: string[];
+  timerDeadline: number | null;
+  adminUnlocked: boolean;
 };
 export type IncidentSave = {
   version: 1;
@@ -32,9 +35,9 @@ const copy = (s: IncidentSave): IncidentSave => ({
   clues: [...s.clues],
   choices: [...s.choices],
   endings: [...s.endings],
-  memory: { ...s.memory, events: [...s.memory.events], evidence: [...s.memory.evidence], recovered: [...s.memory.recovered], changes: [...s.memory.changes] },
+  memory: { ...s.memory, events: [...s.memory.events], evidence: [...s.memory.evidence], recovered: [...s.memory.recovered], changes: [...s.memory.changes], nullChoices: [...s.memory.nullChoices] },
 });
-const emptyMemory = (): ArchiveMemory => ({ version: 1, visits: 0, highestChapter: 1, events: [], evidence: [], recovered: [], changes: [] });
+const emptyMemory = (): ArchiveMemory => ({ version: 1, visits: 0, highestChapter: 1, events: [], evidence: [], recovered: [], changes: [], nullChoices: [], timerDeadline: null, adminUnlocked: false });
 const empty = (): IncidentSave => ({
   version: 1,
   visited: [],
@@ -85,6 +88,9 @@ export function loadIncident(): IncidentSave {
             evidence: strings(s.memory?.evidence),
             recovered: strings(s.memory?.recovered),
             changes: strings(s.memory?.changes),
+            nullChoices: strings(s.memory?.nullChoices),
+            timerDeadline: typeof s.memory?.timerDeadline === "number" && Number.isSafeInteger(s.memory.timerDeadline) && s.memory.timerDeadline >= 0 ? s.memory.timerDeadline : null,
+            adminUnlocked: s.memory?.adminUnlocked === true,
           },
         };
     }
