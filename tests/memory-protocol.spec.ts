@@ -186,3 +186,56 @@ test("new investigation fits narrow viewports without console errors", async ({ 
   }
   expect(errors).toEqual([]);
 });
+
+test("complete new investigation is reachable through existing chapters", async ({ page }) => {
+  await page.clock.install();
+  await page.addInitScript(() => {
+    localStorage.setItem("duality.v1", JSON.stringify({ mode: "archive", unlocked: true, discovered: true }));
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
+  const nav = page.getByRole("navigation", { name: "Разделы INCIDENT 000" });
+  const open = async (label: string) => nav.getByRole("button", { name: label, exact: true }).click();
+  await open("/threads/");
+  await page.getByRole("button", { name: "Прочитать ответ №000" }).click();
+  await page.getByRole("button", { name: "Сохранить заметку модератора" }).click();
+  await page.getByRole("button", { name: "Сохранить запись №1410" }).click();
+  await open("/recovery/");
+  await page.getByLabel("Контрольное слово").fill("TRACE");
+  await page.getByRole("button", { name: "Восстановить переписку" }).click();
+  for (const [a, b] of [[2, 1], [6, 5]]) {
+    await page.getByRole("button", { name: new RegExp(`Фрагмент ${a},`) }).click();
+    await page.getByRole("button", { name: new RegExp(`Фрагмент ${b},`) }).click();
+  }
+  await page.getByRole("button", { name: "Проверить изображение" }).click();
+  await open("/cctv/");
+  await page.getByLabel("Таймкод").selectOption("00:01");
+  await page.getByRole("button", { name: "Сохранить кадр CAMERA_000" }).click();
+  await page.getByLabel("Камера").selectOption("CAM_03");
+  await page.getByLabel("Время").selectOption("00:01");
+  await page.getByRole("button", { name: "Сохранить кадр как улику" }).click();
+  await open("/system/");
+  await page.getByRole("button", { name: "Запустить виртуальную систему" }).click();
+  await page.getByRole("button", { name: "▣ Терминал" }).click();
+  await page.getByLabel("C:\\ARCHIVE>").fill("cd users");
+  await page.getByRole("button", { name: "Выполнить" }).click();
+  await page.getByLabel("C:\\USERS>").fill("unlock 000-0102");
+  await page.getByRole("button", { name: "Выполнить" }).click();
+  await open("/user_000/");
+  await page.getByRole("button", { name: "Я помогу вспомнить" }).click();
+  await page.getByRole("button", { name: "Помогу", exact: true }).click();
+  await open("/journal/");
+  await page.getByLabel("Код ADMIN_1999").fill("TRACE-0001");
+  await page.getByRole("button", { name: "Проверить код" }).click();
+  await page.getByRole("button", { name: "Сохранить противоречие" }).click();
+  await page.getByRole("button", { name: "Запустить MIDNIGHT EVENT" }).click();
+  await page.clock.fastForward("00:20");
+  await expect(page.getByRole("region", { name: "Процедура восстановления памяти" })).toContainText("процедура завершена");
+  await open("/user_000/");
+  await page.getByRole("button", { name: "Сохранить ответ NULL" }).click();
+  await open("/ending/");
+  await page.getByLabel("Последний ключ").fill("MEMORY-0001");
+  await page.getByRole("button", { name: "Проверить ключ" }).click();
+  await page.getByRole("button", { name: "Запустить MEMORY PROTOCOL" }).click();
+  await expect(page.locator(".incident-ending")).toContainText("MEMORY PROTOCOL");
+});
