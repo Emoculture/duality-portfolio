@@ -11,6 +11,7 @@ import {
 } from "./state";
 import Desktop from "./Desktop";
 import History from "./History";
+import MemoryCase from "./MemoryCase";
 import "./incident.css";
 export type View =
   | "journal"
@@ -145,6 +146,7 @@ export default function Incident({
       choices: [],
       systemUnlocked: false,
       lastEnding: null,
+      memory: { ...s.memory, evidence: [], recovered: [], changes: [] },
     }));
     setReset(false);
     setErase(false);
@@ -257,6 +259,7 @@ export default function Incident({
               Входов в архив: {save.memory.visits} · максимальная глава: {save.memory.highestChapter}/7
               {save.memory.visits > 1 && <> · Ты снова здесь.</>}
             </p>
+            <MemoryCase view="journal" save={save} update={update} />
             {steps.map((s, i) => (
               <p key={s}>
                 [{save.clues.includes(s) ? "X" : " "}] {chapterNames[i]} —{" "}
@@ -304,6 +307,7 @@ export default function Incident({
       )}
       {view === "forum" && (
         <>
+          <MemoryCase view="forum" save={save} update={update} />
           <article className="incident-panel">
             <h3>No.1273 / 17.04.2004 00:01</h3>
             <p>Anonymous: «На форуме снова пропала аватарка. У кого так же?»</p>
@@ -346,6 +350,7 @@ export default function Incident({
       )}
       {view === "recovery" && (
         <>
+          <MemoryCase view="recovery" save={save} update={update} />
           <article className="incident-panel">
             <h3>IMAGE_017.JPG</h3>
             <p>
@@ -507,6 +512,7 @@ export default function Incident({
       )}
       {view === "cctv" && (
         <div className="incident-panel">
+          <MemoryCase view="cctv" save={save} update={update} />
           <h3>Архивные кадры наблюдения</h3>
           <p>
             Это отдельные неподвижные кадры, не видеозапись. Сверьте CAM_03 с

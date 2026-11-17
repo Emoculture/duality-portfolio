@@ -4,6 +4,9 @@ export type ArchiveMemory = {
   visits: number;
   highestChapter: number;
   events: string[];
+  evidence: string[];
+  recovered: string[];
+  changes: string[];
 };
 export type IncidentSave = {
   version: 1;
@@ -29,9 +32,9 @@ const copy = (s: IncidentSave): IncidentSave => ({
   clues: [...s.clues],
   choices: [...s.choices],
   endings: [...s.endings],
-  memory: { ...s.memory, events: [...s.memory.events] },
+  memory: { ...s.memory, events: [...s.memory.events], evidence: [...s.memory.evidence], recovered: [...s.memory.recovered], changes: [...s.memory.changes] },
 });
-const emptyMemory = (): ArchiveMemory => ({ version: 1, visits: 0, highestChapter: 1, events: [] });
+const emptyMemory = (): ArchiveMemory => ({ version: 1, visits: 0, highestChapter: 1, events: [], evidence: [], recovered: [], changes: [] });
 const empty = (): IncidentSave => ({
   version: 1,
   visited: [],
@@ -79,6 +82,9 @@ export function loadIncident(): IncidentSave {
             visits: Number.isSafeInteger(s.memory?.visits) ? Math.max(0, Math.min(100000, s.memory.visits)) : 0,
             highestChapter: Number.isInteger(s.memory?.highestChapter) ? Math.max(1, Math.min(7, s.memory.highestChapter)) : 1,
             events: strings(s.memory?.events),
+            evidence: strings(s.memory?.evidence),
+            recovered: strings(s.memory?.recovered),
+            changes: strings(s.memory?.changes),
           },
         };
     }
