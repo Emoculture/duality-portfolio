@@ -27,7 +27,7 @@ for (const previousMode of ["normal", "game", "archive"] as const) {
 test("visible square starts the puzzle for a new visitor and old hidden entry remains", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("button", { name: "Войти на сайт" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Неизвестный объект" })).toHaveText("?");
+  await expect(page.getByRole("button", { name: "Неизвестный объект" })).toContainText("?");
   await expect(page.getByRole("button", { name: "Исследовать деталь" })).toBeAttached();
   await page.getByRole("button", { name: "Неизвестный объект" }).click();
   await expect(page.getByRole("heading", { name: "README.TXT" })).toBeVisible();
@@ -73,4 +73,25 @@ test("recordings trigger from case progress and can be replayed without changing
   await expect(page.locator(".pixel-cutscene")).toContainText("THIS RECORDING WAS MADE TOMORROW.");
   await page.getByRole("button", { name: "Завершить запись" }).click();
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem("duality.incident.v1")!).memory.events)).toEqual(before);
+});
+
+test("skipping recovery still plays first contact and revealed text stays visible", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.clock.install();
+  await page.addInitScript(() => localStorage.setItem("duality.v1", JSON.stringify({ unlocked: true })));
+  await page.goto("/");
+  await page.getByRole("button", { name: "Неизвестный объект" }).click();
+  await page.clock.fastForward(700);
+  await page.clock.fastForward(1200);
+  await page.getByRole("button", { name: "Пропустить", exact: true }).click();
+  await expect(page.locator(".connection-screen")).toHaveCount(0);
+  await expect(page.locator(".archive-board")).toHaveCount(0);
+  const scene = page.locator(".pixel-cutscene");
+  await expect(scene).toContainText("FIRST CONTACT");
+  await scene.getByRole("button", { name: "Показать текст" }).click();
+  await expect(scene).toContainText("Ты всё-таки открыл его.");
+  await page.clock.fastForward(700);
+  await expect(scene).toContainText("Ты всё-таки открыл его.");
+  await scene.getByRole("button", { name: "Пропустить запись" }).click();
+  await expect(page.locator(".archive-board")).toBeVisible();
 });

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./pixel-cutscene.css";
 
 export type RecordingId = "first" | "recording" | "two" | "final";
@@ -14,6 +14,7 @@ export default function PixelCutscene({ id, replay = false, completed = false, r
   const [line, setLine] = useState(0);
   const [visible, setVisible] = useState(0);
   const [failed, setFailed] = useState(false);
+  const typing = useRef<number | null>(null);
   const item = recordings[id];
   const text = line < item.lines.length ? item.lines[line] : item.end;
   let short = reduced || document.documentElement.dataset.reduced === "true";
@@ -21,11 +22,17 @@ export default function PixelCutscene({ id, replay = false, completed = false, r
   useEffect(() => {
     setVisible(short ? text.length : 0);
     if (short) return;
-    const timer = window.setInterval(() => setVisible((n) => Math.min(n + 2, text.length)), 35);
+    let count = 0;
+    const timer = window.setInterval(() => {
+      count = Math.min(count + 2, text.length);
+      setVisible(count);
+      if (count >= text.length) window.clearInterval(timer);
+    }, 35);
+    typing.current = timer;
     return () => window.clearInterval(timer);
   }, [text, short]);
   function next() {
-    if (visible < text.length) setVisible(text.length);
+    if (visible < text.length) { if (typing.current !== null) window.clearInterval(typing.current); setVisible(text.length); }
     else if (line < item.lines.length) setLine(line + 1);
     else onComplete();
   }

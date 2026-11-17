@@ -31,7 +31,7 @@ export default function Welcome({
           <button className="pill" onClick={onContinue}>
             Войти на сайт <Arrow />
           </button>
-          <button className="unknown-object" title="UNKNOWN OBJECT" aria-label="Неизвестный объект" onClick={onSecret}><span aria-hidden="true">?</span></button>
+          <button className="unknown-object" title="UNKNOWN OBJECT" aria-label="Неизвестный объект" onClick={onSecret}><span className="unknown-question" aria-hidden="true">?</span><span className="unknown-zero" aria-hidden="true">000</span></button>
         </div>
         <div className="welcome-sculpture" aria-hidden="true">
           <div className="orbit orbit-one" />

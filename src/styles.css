@@ -205,7 +205,12 @@ em {
   align-self: flex-start;
 }
 .welcome-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; position: relative; z-index: 1; }
-.unknown-object { width: 52px; height: 52px; border: 3px ridge #a27f7c; border-radius: 0; background: #58171d; color: #f1e8da; font: bold 25px/1 "Courier New", monospace; box-shadow: inset 2px 0 #311013, inset -2px -2px #8d3e3a; }
+.unknown-object { position: relative; width: 52px; height: 52px; border: 3px ridge #a27f7c; border-radius: 0; background: #58171d; color: #f1e8da; font: bold 25px/1 "Courier New", monospace; box-shadow: inset 2px 0 #311013, inset -2px -2px #8d3e3a; }
+.unknown-object span { position: absolute; inset: 0; display: grid; place-items: center; }
+.unknown-question { animation: unknown-question 14s steps(1) infinite; }
+.unknown-zero { font-size: 14px; opacity: 0; animation: unknown-zero 14s steps(1) infinite; }
+@keyframes unknown-question { 97% { opacity: 1; } 98% { opacity: 0; } }
+@keyframes unknown-zero { 97% { opacity: 0; } 98% { opacity: 1; } }
 .unknown-object:hover { transform: translateX(1px); box-shadow: 2px 0 #9d776f, -2px 0 #372725; }
 .unknown-object:focus-visible { outline: 3px solid #702525; outline-offset: 4px; }
 .welcome-footer {
