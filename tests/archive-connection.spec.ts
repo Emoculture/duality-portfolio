@@ -16,9 +16,9 @@ test("wrong key stays in game; successful first connection finishes without loop
   await page.clock.fastForward(1500);
   const sequence = page.getByLabel("ARCHIVE CONNECTION SEQUENCE");
   await expect(sequence).toBeVisible();
-  await page.clock.fastForward(4500);
+  await page.clock.fastForward(6500);
   await expect(sequence).toContainText("NEW MEMORY SIGNATURE DETECTED");
-  await expect(sequence).not.toContainText("THIS SESSION HAS BEEN SEEN BEFORE");
+  await expect(sequence).not.toContainText("RESTORING SESSION...");
   await page.clock.fastForward(5000);
   await expect(page.locator(".archive-board")).toBeVisible();
   await expect(sequence).toHaveCount(0);
@@ -42,9 +42,9 @@ test("returning player can skip connection without losing progress", async ({ pa
   await page.getByLabel("Ключ доступа").fill("ECHO-04-17");
   await page.getByRole("button", { name: "Открыть архив" }).click();
   await page.clock.fastForward(1500);
-  await page.clock.fastForward(4500);
+  await page.clock.fastForward(6500);
   const sequence = page.getByLabel("ARCHIVE CONNECTION SEQUENCE");
-  await expect(sequence).toContainText("THIS SESSION HAS BEEN SEEN BEFORE");
+  await expect(sequence).toContainText("RESTORING SESSION...");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   await sequence.getByRole("button", { name: "Пропустить" }).click();
   await expect(page.locator(".archive-board")).toHaveAttribute("data-incident-stage", "3");
