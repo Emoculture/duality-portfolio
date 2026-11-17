@@ -1,5 +1,34 @@
 import { expect, test } from "@playwright/test";
 
+test("CAMERA_000 reveals a distinct restored frame and a hidden photo mark", async ({ page }) => {
+  await page.addInitScript(() => {
+    if (!localStorage.getItem("camera-extra-seeded")) {
+      localStorage.setItem("camera-extra-seeded", "yes");
+      localStorage.setItem("duality.v1", JSON.stringify({ mode: "archive", unlocked: true }));
+      localStorage.setItem("duality.incident.v1", JSON.stringify({ version: 1, clues: ["thread", "moderator", "image"], memory: { recovered: ["CASE_PHOTO"] } }));
+    }
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
+  await page.getByRole("navigation", { name: "Разделы INCIDENT 000" }).getByRole("button", { name: "/cctv/" }).click();
+  await expect(page.locator(".memory-camera-mark")).toContainText("017");
+  await page.getByLabel("Таймкод").selectOption("00:02");
+  await expect(page.locator(".memory-camera img")).toHaveAttribute("src", "/archive/camera-unknown.svg");
+  await page.evaluate(() => {
+    const saved = JSON.parse(localStorage.getItem("duality.incident.v1")!);
+    saved.memory.events.push("midnight");
+    localStorage.setItem("duality.incident.v1", JSON.stringify(saved));
+  });
+  await page.reload();
+  await page.getByRole("button", { name: "INCIDENT_000.TXT" }).click();
+  await page.getByRole("navigation", { name: "Разделы INCIDENT 000" }).getByRole("button", { name: "/cctv/" }).click();
+  await page.getByLabel("Таймкод").selectOption("00:02");
+  await expect(page.locator(".memory-camera img")).toHaveAttribute("src", "/archive/camera-000-restored.svg");
+  await page.getByRole("button", { name: "Увеличить CAMERA_000" }).click();
+  await expect(page.locator(".memory-camera")).toHaveClass(/memory-camera-zoom/);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+});
+
 for (const choice of ["memory", "record"] as const) {
   test(`NULL remembers the ${choice} interpretation and preserves it after reload`, async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });

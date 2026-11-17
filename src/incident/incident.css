@@ -56,8 +56,10 @@
 .recovered-collection h4 { margin: 6px 0; color: #702525; }
 .recovered-photo { display: block; max-width: 320px; width: 100%; }
 .memory-case ul { padding-left: 20px; }
-.memory-camera { position: relative; margin: 10px 0; max-width: 560px; background: #202520; color: #eee; }
+.memory-camera { position: relative; margin: 10px 0; max-width: 560px; overflow: hidden; background: #202520; color: #eee; }
 .memory-camera img { display: block; width: 100%; height: 210px; object-fit: cover; filter: grayscale(1); }
+.memory-camera-zoom img { transform: scale(1.35); }
+.memory-camera-mark { position: absolute; right: 10%; top: 20%; color: #d6e1c9; background: #101810cc; font: 10px "Courier New", monospace; }
 .memory-camera figcaption { padding: 4px; font: 12px "Courier New", monospace; }
 .memory-camera-1::after { content: ""; position: absolute; top: 48%; left: 57%; width: 16px; height: 60px; background: #151915; box-shadow: 0 0 5px #202820; border-radius: 45% 45% 0 0; }
 .memory-camera-2 img { opacity: .4; filter: grayscale(1) contrast(1.4); }
@@ -92,6 +94,11 @@
 .archive-board[data-incident-stage="6"] .memory-messenger::after,
 .archive-board[data-incident-stage="7"] .memory-messenger::after { content: "▚ ▖ ▚ / signal fragment"; color: #71504b; font: 10px "Courier New", monospace; }
 .archive-board[data-incident-stage="7"] .incident-panel { border-right: 2px dashed #aea095; }
+.archive-board[data-incident-stage="3"] .incident-journal::after { content: "[IMAGE_017: pixel checksum?]"; }
+.archive-board[data-incident-stage="4"] .incident-journal::after { content: "[CAM_03: 00:01 / 00:02]"; }
+.archive-board[data-incident-stage="5"] .incident-journal::after { content: "[SYSTEM: COPY BEFORE DELETE]"; }
+.archive-board[data-incident-stage="6"] .incident-journal::after { content: "[USER_000: reply already saved]"; }
+.archive-board[data-incident-stage="7"] .incident-journal::after { content: "[MEMORY: 00? / retain copy]"; }
 .archive-observer { font: 11px/1.4 "Courier New", monospace; color: #5d3734; }
 .observer-window { max-width: 330px; margin: 8px 0; padding: 8px; color: #111; background: #c4c4bb; border: 2px outset #eee; }
 .observer-window button { padding: 5px 12px; border: 2px outset #eee; background: #d4d4cb; color: #111; }

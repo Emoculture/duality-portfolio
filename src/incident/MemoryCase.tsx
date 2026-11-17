@@ -13,6 +13,7 @@ export default function MemoryCase({ view, save, update }: Props) {
   const [answer, setAnswer] = useState("");
   const [feedback, setFeedback] = useState("");
   const [frame, setFrame] = useState("00:00");
+  const [enlarged, setEnlarged] = useState(false);
   const memory = save.memory;
   const unlocked = save.clues.includes("moderator");
   const photo = save.clues.includes("image");
@@ -78,10 +79,13 @@ export default function MemoryCase({ view, save, update }: Props) {
         <label>Таймкод <select value={frame} onChange={(event) => setFrame(event.target.value)}>
           <option>00:00</option><option>00:01</option><option>00:02</option>
         </select></label>
-        <figure className={`memory-camera memory-camera-${frame.slice(-1)} ${frame === "00:02" && memory.events.includes("midnight") ? "memory-camera-restored" : ""}`}>
-          <img src="/archive/camera-unknown.svg" alt="Вымышленная комната в архиве камеры" />
+        <figure className={`memory-camera memory-camera-${frame.slice(-1)} ${frame === "00:02" && memory.events.includes("midnight") ? "memory-camera-restored" : ""} ${enlarged ? "memory-camera-zoom" : ""}`}>
+          <img src={frame === "00:02" && memory.events.includes("midnight") ? "/archive/camera-000-restored.svg" : "/archive/camera-unknown.svg"} alt="Вымышленная комната в архиве камеры" />
           <figcaption>CAMERA_000 / {frame} {frame === "00:02" ? (memory.events.includes("midnight") ? "— СИГНАЛ ВОССТАНОВЛЕН: ДВЕРЬ ОТКРЫТА" : "— ПОТЕРЯ СИГНАЛА") : frame === "00:01" ? "— ТЕНЬ У ДВЕРИ" : "— АРХИВНЫЙ КАДР"}</figcaption>
+          {memory.recovered.includes("CASE_PHOTO") && frame === "00:00" && <span className="memory-camera-mark">017 / ←</span>}
         </figure>
+        <button onClick={() => setEnlarged(!enlarged)}>{enlarged ? "Уменьшить CAMERA_000" : "Увеличить CAMERA_000"}</button>
+        {memory.recovered.includes("CASE_PHOTO") && frame === "00:00" && <p>На повторном просмотре видна отметка 017; в фотографии она была закрыта повреждённым фрагментом.</p>}
         {frame === "00:02" && memory.events.includes("midnight") && <p>Восстановленная запись противоречит журналу: дверь открыта до команды администратора.</p>}
         {frame === "00:01" && <><p>На кадре есть тень, но журнал камеры не содержит записи об открытии двери.</p><button onClick={() => collect("camera000")}>Сохранить кадр CAMERA_000</button></>}
         {memory.evidence.includes("camera000") && <p>Кадр сохранён в деле.</p>}
